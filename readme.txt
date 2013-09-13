@@ -15,6 +15,9 @@ Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed prev
 == Description ==
 Shortcodes for integrating YouTube and Vimeo into posts. Numerous options that include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, user uploads and groups.
 
+For a better looking explination visit:
+http://localhost/redshiftstudio/www/wp-theater/
+
 Three pieces of information are needed:
 
 1. Service -- "youtube" or "vimeo".
@@ -36,17 +39,17 @@ Many of the parameters are set up to allow short versions -- a parameter without
 The following contain a "theater" by default
 
 **User** -- Listing of a user's videos
-`[youtube user]UserID[/youtube]
-[vimeo user]UserID[/youtube]`
+`[youtube user]UserName[/youtube]
+[vimeo user]UserID[/vimeo]`
 
 **Channel** -- Listing of videos from a specific channel
-`[vimeo channel]ChannelID[/youtube]`
+`[vimeo channel]ChannelID[/vimeo]`
 
 **Playlist** -- Listing of videos from a user's playlist
 `[youtube playlist]PlaylistID[/youtube]`
 
 **Group** -- Listing of vidoes from a specific group
-`[vimeo user]GroupID[/youtube]`
+`[vimeo group]GroupID[/vimeo]`
 
 
 = Shortcode Parameters =
