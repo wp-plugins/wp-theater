@@ -8,14 +8,14 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, shortcode, embed, channel, playlist, group, user, youtube, vimeo, lower lights, full window, preset
 Requires at least: 3.6
 Tested up to: 3.6.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
 
 == Description ==
 Shortcodes for integrating YouTube and Vimeo into posts. Numerous options that include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, user uploads and groups.
 
-For a better looking explination visit:
+For a better looking explination and parameter usage please visit:
 http://localhost/redshiftstudio/www/wp-theater/
 
 Three pieces of information are needed:
@@ -77,7 +77,7 @@ Keep in mind that presets are available that provide suitable default values for
 
 = Shortened Shortcode Parameters =
 
-Shortened parameters are those without a value.  e.g. not *parameter="somevalue"* but just *parameter*.
+Shortened parameters are those without a value.  e.g. not *parameter="somevalue"* but just *somevalue*.
 
 e.g. [youtube preview hide_title max="9" hide_more_link]
 
@@ -150,7 +150,7 @@ You can choose to disable the built in JS file so that you can write your own.
 
 
 = Filters =
-*most filters have not been tested yet but should all word as expected.*
+*most filters have not been tested yet but should all work as expected.*
 
 Display -- override built in output
 
