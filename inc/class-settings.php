@@ -90,14 +90,6 @@ class WP_Theater_Settings {
 		);
 
 		add_settings_field(
-			'wpts_genset_load_js',
-			'Load Default Javascript?', 
-			array( $this, 'default_js_fields' ),
-			'wp_theater',
-			'wpts_genset'
-		);
-
-		add_settings_field(
 			'wpts_genset_load_gi',
 			'Load Genericons?<br/><em>if not already loaded</em>', 
 			array( $this, 'default_genericons_fields' ),
@@ -106,7 +98,15 @@ class WP_Theater_Settings {
 		);
 
 		add_settings_field(
-			'wpts_genset_load_gi',
+			'wpts_genset_load_js',
+			'Load Default Javascript?', 
+			array( $this, 'default_js_fields' ),
+			'wp_theater',
+			'wpts_genset'
+		);
+
+		add_settings_field(
+			'wpts_genset_cache_life',
 			'Feed Cache Length?<br/><em>in seconds</em>', 
 			array( $this, 'default_cache_fields' ),
 			'wp_theater',
@@ -122,7 +122,6 @@ class WP_Theater_Settings {
 			$input['load_js'] = (int) $input['load_js'];
 		if(isset($input['load_genericons']))
 			$input['load_genericons'] = (int) $input['load_genericons'];
-		return $input;
 		if(isset($input['cache_life']))
 			$input['cache_life'] = (int) $input['cache_life'];
 		return $input;
@@ -142,14 +141,6 @@ class WP_Theater_Settings {
 	}
 
 	/* filed output */
-	public function default_js_fields() {
-		$options = get_option('wp_theater_options');
-		$load_js = (isset($options['load_js'])) ? $options['load_js'] : '';
-		$load_js = (int) $load_js; //sanitise output
-		echo '<input type="checkbox" id="load_js" name="wp_theater_options[load_js]" value="1" ' . checked( 1, $load_js, false ) . '>';
-	}
-
-	/* filed output */
 	public function default_genericons_fields() {
 		$options = get_option('wp_theater_options');
 		$load_gi = (isset($options['load_genericons'])) ? $options['load_genericons'] : '';
@@ -158,11 +149,19 @@ class WP_Theater_Settings {
 	}
 
 	/* filed output */
+	public function default_js_fields() {
+		$options = get_option('wp_theater_options');
+		$load_js = (isset($options['load_js'])) ? $options['load_js'] : '';
+		$load_js = (int) $load_js; //sanitise output
+		echo '<input type="checkbox" id="load_js" name="wp_theater_options[load_js]" value="1" ' . checked( 1, $load_js, false ) . '>';
+	}
+
+	/* filed output */
 	public function default_cache_fields() {
 		$options = get_option('wp_theater_options');
 		$cache_life = (isset($options['cache_life'])) ? $options['cache_life'] : '';
 		$cache_life = (int) $cache_life; //sanitise output
-		echo '<input id="cache_life" name="wp_theater_options[cache_life]" class="small-text" type="number" min="0" step="1" value="' . $cache_life . '">';
+		echo '<input type="number" id="cache_life" name="wp_theater_options[cache_life]" class="small-text" min="0" step="1" value="' . $cache_life . '">';
 	}
 	/**/
 
