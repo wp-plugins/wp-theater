@@ -104,6 +104,14 @@ class WP_Theater_Settings {
 			'wp_theater',
 			'wpts_genset'
 		);
+
+		add_settings_field(
+			'wpts_genset_load_gi',
+			'Feed Cache Length?<br/><em>in seconds</em>', 
+			array( $this, 'default_cache_fields' ),
+			'wp_theater',
+			'wpts_genset'
+		);
 	}
 
 	/* validate input */
@@ -114,6 +122,9 @@ class WP_Theater_Settings {
 			$input['load_js'] = (int) $input['load_js'];
 		if(isset($input['load_genericons']))
 			$input['load_genericons'] = (int) $input['load_genericons'];
+		return $input;
+		if(isset($input['cache_life']))
+			$input['cache_life'] = (int) $input['cache_life'];
 		return $input;
 	}
 
@@ -144,6 +155,14 @@ class WP_Theater_Settings {
 		$load_gi = (isset($options['load_genericons'])) ? $options['load_genericons'] : '';
 		$load_gi = (int) $load_gi; //sanitise output
 		echo '<input type="checkbox" id="load_genericons" name="wp_theater_options[load_genericons]" value="1" ' . checked( 1, $load_gi, false ) . '>';
+	}
+
+	/* filed output */
+	public function default_cache_fields() {
+		$options = get_option('wp_theater_options');
+		$cache_life = (isset($options['cache_life'])) ? $options['cache_life'] : '';
+		$cache_life = (int) $cache_life; //sanitise output
+		echo '<input id="cache_life" name="wp_theater_options[cache_life]" class="small-text" type="number" min="0" step="1" value="' . $cache_life . '">';
 	}
 	/**/
 

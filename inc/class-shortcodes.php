@@ -208,11 +208,11 @@ class WP_Theater_Shortcodes  {
 		$cache_life = isset($options['cache_life']) ? (int) $options['cache_life'] : 0;
 
 		// set the transient data for this feed
-		if( $mode != 'preview' && $cache_life == 999 ) {
+		if( $mode != 'preview' && $cache_life == 0 ) {
 			$transient_name = 'wp_theater_transient_feed_' . $service . '_' . $mode . '_' . $id;
 			if ( false === ( $feed = get_transient( $transient_name ) ) ) {
 				$feed = $this->get_api_data( $atts );
-				set_transient( $transient_name, $feed, 60*60*2 );
+				set_transient( $transient_name, $feed, $cache_life );
 			}
 		}else{
 			$feed = $this->get_api_data( $atts );
