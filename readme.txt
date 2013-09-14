@@ -185,7 +185,7 @@ add_action('wp_theater-add_shortcodes', 'my_preset_init');
 
 
 == Changelog ==
-= 1.0.3 (09/14/2013) =
+= 1.0.5 (09/14/2013) =
 
 * Enabled setting for transient cache length
 
