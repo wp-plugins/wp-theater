@@ -1,5 +1,5 @@
 <?php 
-if( class_exists( 'WP_Theater' ) && !class_exists( 'WP_Theater_Shortcodes' ) ) {
+if(class_exists('WP_Theater') && !class_exists('WP_Theater_Shortcodes')) {
 
 class WP_Theater_Shortcodes  {
 
@@ -25,7 +25,7 @@ class WP_Theater_Shortcodes  {
 
 		$presets = WP_Theater::$presets;
 
-		$presets->set_preset( 'default', array( 
+		$presets->set_preset('default', array(
 			'preset' => '',
 			'service' => 'youtube',
 			'mode' => 'embed',
@@ -35,6 +35,7 @@ class WP_Theater_Shortcodes  {
 			'class'=> '',
 			'img_size' => 'small',
 			'max' => 12,
+			'autoplay_onclick' => TRUE,
 
 			// Title settings
 			'show_title' => TRUE,
@@ -46,21 +47,20 @@ class WP_Theater_Shortcodes  {
 			'more_url' => FALSE,
 			'more_text' => FALSE,
 
-			// theater options
+			// Theater options
 			'show_theater' => TRUE,
 			'theater_id' => FALSE,
 			'show_fullwindow' => FALSE,
 			'show_lowerlights' => FALSE,
 
-			/* Modes cannot be defined except by through a preset and should always:
-			 * - be defined as a full set -- you can't just update one value in the array and get the expected result in combination with shortcode_atts
-			 * - minimally contain %id% in place of the ID or User Name -- Will eventually include %request% and %format%
+			/* Modes cannot be defined except through a preset and should always:
+			 * - minimally contain %id% in place of the ID or User Name -- Will eventually include %request% and %format% variable positions
 			 */
 			'modes' => array(),
-		) );
+		));
 
 		// Add YouTube preset
-		$presets->set_preset( 'youtube', $this->shortcode_atts( $presets->get_preset( 'default' ), array( 
+		$presets->set_preset('youtube', $this->shortcode_atts($presets->get_preset('default'), array(
 			'service'  => 'youtube',
 			'img'      => 0,
 			'img_size' => 'medium', // tests fallback -- YouTube has only small and large
@@ -73,10 +73,10 @@ class WP_Theater_Shortcodes  {
 				'user'     => 'http://gdata.youtube.com/feeds/api/users/%id%/uploads?v=2&alt=jsonc&max-results=20',
 				'playlist' => 'http://gdata.youtube.com/feeds/api/playlists/%id%?v=2&alt=jsonc&max-results=20'
 			),
-		) ) );
+		)));
 
 		// Add Vimeo preset
-		$presets->set_preset( 'vimeo', $this->shortcode_atts( $presets->get_preset( 'default' ), array(
+		$presets->set_preset('vimeo', $this->shortcode_atts($presets->get_preset('default'), array(
 			'service'  => 'vimeo',
 			'img'      => 0,
 			'img_size' => 'medium',
@@ -89,12 +89,12 @@ class WP_Theater_Shortcodes  {
 				'channel'  => 'http://vimeo.com/api/v2/channel/%id%/',
 				'group'    => 'http://vimeo.com/api/v2/group/%id%/'
 			),
-		) ) );
+		)));
 
 		// widget presets as a temp work around until I can make them proper -- cachable -- widgets
 
 		// Add YouTube preset for sidebars
-		$presets->set_preset( 'youtube_widget', $this->shortcode_atts( $presets->get_preset( 'youtube' ), array(
+		$presets->set_preset('youtube_widget', $this->shortcode_atts($presets->get_preset('youtube'), array(
 			'embed_width' => 360,
 			'embed_height' => 170,
 			'max' => 9,
@@ -104,10 +104,10 @@ class WP_Theater_Shortcodes  {
 			'show_more_link'  => FALSE,
 			'show_fullwindow' => FALSE,
 			'show_lowerlights' => FALSE,
-		) ) );
+		)));
 
 		// Add YouTube preset for sidebars
-		$presets->set_preset( 'vimeo_widget', $this->shortcode_atts( $presets->get_preset( 'vimeo' ), array(
+		$presets->set_preset('vimeo_widget', $this->shortcode_atts($presets->get_preset('vimeo'), array(
 			'embed_width' => 360,
 			'embed_height' => 170,
 			'max' => 9,
@@ -117,22 +117,19 @@ class WP_Theater_Shortcodes  {
 			'show_more_link'  => FALSE,
 			'show_fullwindow' => FALSE,
 			'show_lowerlights' => FALSE,
-		) ) );
-
-		// register the main shortcode
-		add_shortcode( 'video',          array( $this, 'video_shortcode' ) );
+		)));
 
 		// register the presets as shortcodes
-		add_shortcode( 'youtube',        array( $this, 'video_shortcode' ) );
-		add_shortcode( 'vimeo',          array( $this, 'video_shortcode' ) );
-		add_shortcode( 'youtube_widget', array( $this, 'video_shortcode' ) );
-		add_shortcode( 'vimeo_widget',   array( $this, 'video_shortcode' ) );
+		add_shortcode('youtube',        array($this, 'video_shortcode'));
+		add_shortcode('vimeo',          array($this, 'video_shortcode'));
+		add_shortcode('youtube_widget', array($this, 'video_shortcode'));
+		add_shortcode('vimeo_widget',   array($this, 'video_shortcode'));
 
 		do_action('wp_theater-add_shortcodes', $presets);
 	}
 
 	/**
-	 * Creates a basic wrapper for a video to sit in.  No long a stand alone shortcode
+	 * Creates a basic wrapper for a video to sit in.  No longer a stand alone shortcode
 	 * @since WP Theater 1.0.0
 	 *
 	 * @param array $atts The shortcode's attributes
@@ -140,28 +137,28 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string The string to be inserted in place of the shortcode.
 	 */
-	public function theater_shortcode( $atts, $content = '', $tag ) {
+	public function theater_shortcode($atts, $content = '', $tag) {
 
 		// allow a filter to replace the output.
-		$result = apply_filters( 'wp_theater-pre_theater', '', $atts, $content, $tag );
-		if ( !empty( $result ) )
+		$result = apply_filters('wp_theater-pre_theater', '', $atts, $content, $tag);
+		if (!empty($result))
 			return $result;
 
 		// check if the content already contains html -- an easy way for people to wrap an embedded playlist
-		if ( !preg_match( '/<.*>/', $content ) )
-				$content = $this->get_iframe( $atts );
+		if (!preg_match('/<.*>/', $content))
+				$content = $this->get_iframe($atts);
 
-		$theater_data = ($atts['mode'] == 'theater' && $atts['theater_id']) ? ' id="' . esc_attr( $atts['theater_id'] ) . '"' : '';
+		$theater_data = ($atts['mode'] == 'theater' && $atts['theater_id']) ? ' id="' . esc_attr($atts['theater_id']) . '"' : '';
 
-		$result  = '<div class="wp-theater-bigscreen ' . esc_attr( $atts['service'] ) . ' ' . esc_attr( $atts['class'] ) . '" data-ratio=1.777777777' . $theater_data . '>';
+		$result  = '<div class="wp-theater-bigscreen ' . esc_attr($atts['service']) . ' ' . esc_attr($atts['class']) . '" data-ratio=1.777777777' . $theater_data . '>';
 		$result .= '	<div class="wp-theater-bigscreen-inner">';
 		$result .= 			$content;
 		$result .= '		<div class="wp-theater-bigscreen-options">';
 
-		if ( $atts['show_lowerlights'] )
+		if ($atts['show_lowerlights'])
 			$result .= '		<a class="lowerlights-toggle" title="Toggle Lights" href="#"><span class="icon">Toggle Lights</span></a>';
 
-		if ( $atts['show_fullwindow'] )
+		if ($atts['show_fullwindow'])
 			$result .= '		<a class="fullwindow-toggle" title="Toggle Full Window" href="#"><span class="icon">Toggle Full Window</span></a>';
 
 		$result .= '		</div>';
@@ -180,23 +177,23 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string The string to be inserted in place of the shortcode.
 	 */
-	public function video_shortcode( $atts, $content = '', $tag ) {
+	public function video_shortcode($atts, $content = '', $tag) {
 
 		// let the plugin know that we need to load assets
-		if ( !WP_Theater::$shortcode_in_use ) WP_Theater::$shortcode_in_use = true;
+		WP_Theater::enqueue_assets();
 
 		// make sure all the atts are clean, setup correctly and extracted
-		$atts = $this->format_params( $atts, $content, $tag );
-		if ( $atts === FALSE ) return '';
-		extract( $atts );
+		$atts = $this->format_params($atts, $content, $tag);
+		if ($atts === FALSE) return '';
+		extract($atts);
 
 		// can we just embed an iframe?
-		if( 'embed' == $mode )
-			return $this->get_iframe( $atts );
+		if('embed' == $mode)
+			return $this->get_iframe($atts);
 
 		// can we just embed a theater?
-		if( 'theater' == $mode ) {
-			return $this->theater_shortcode( $atts, $content, $tag );
+		if('theater' == $mode) {
+			return $this->theater_shortcode($atts, $content, $tag);
 		}
 
 		// Else we need data
@@ -206,79 +203,84 @@ class WP_Theater_Shortcodes  {
 		$cache_life = isset($options['cache_life']) ? (int) $options['cache_life'] : 0;
 
 		// set the transient data for this feed
-		if( $mode != 'preview' && $cache_life == 0 ) {
+		if($mode != 'preview' && $cache_life == 0) {
 			$transient_name = 'wp_theater_transient_feed_' . $service . '_' . $mode . '_' . $id;
-			if ( false === ( $feed = get_transient( $transient_name ) ) ) {
-				$feed = $this->get_api_data( $atts );
-				set_transient( $transient_name, $feed, $cache_life );
+			if (false === ($feed = get_transient($transient_name))) {
+				$feed = $this->get_api_data($atts);
+				set_transient($transient_name, $feed, $cache_life);
 			}
 		}else{
-			$feed = $this->get_api_data( $atts );
+			$feed = $this->get_api_data($atts);
 		}
 
-		if( empty( $feed ) || !isset($feed->videos) || !count( $feed->videos ) )
+		if(empty($feed) || !isset($feed->videos) || !count($feed->videos))
 			return '';
 
 		// Figure out the title -- title attr first, content second, api feed third
-		if( empty( $title ) ) {
-			if( !empty( $content ) && $id != $content ) {
+		if(empty($title)) {
+			if(!empty($content) && $id != $content) {
 				$title = $content;
 				$content = '';
-			}elseif( isset( $feed->title ) ) $title = $feed->title;
+			}elseif(isset($feed->title)) $title = $feed->title;
+		}
+
+		// make sure we only have as many as we want
+		if (isset($max) && $max !== FALSE && $max > 0 && $max < count($feed->videos)) {
+			$max_videos = array_slice($feed->videos, 0, $max);
+			$feed->videos = $max_videos;
 		}
 
 		// Feed is formatted & ready to display
 
 		// do we just need one video?
-		if( $mode == 'preview') {
-			if ( count( $feed->videos == 1 ) )
-				return $this->video_preview( $feed->videos[0], $atts );
+		if($mode == 'preview') {
+			if (count($feed->videos == 1))
+				return $this->video_preview($feed->videos[0], $atts);
 			else return '';
 		}
 
 		// allow a filter to replace the output.
-		$result = apply_filters( 'wp_theater-pre_video_shortcode', '', $feed, $atts, $content, $tag );
-		if( !empty( $result ) ) return $result;
+		$result = apply_filters('wp_theater-pre_video_shortcode', '', $feed, $atts, $content, $tag);
+		if(!empty($result)) return $result;
 
 		// Start formatting results
 
-		$theater_data = !$show_theater && $theater_id ? ' data-theater-id="' . esc_attr( $theater_id ) . '"' : '';
-		$result = '<section class="entry-section wp-theater-section ' . esc_attr( $service ) . ' ' . esc_attr( $mode ) . ' ' . esc_attr( $atts['class'] ) . '"' .  $theater_data . '>';
+		$theater_data = !$show_theater && $theater_id ? ' data-theater-id="' . esc_attr($theater_id) . '"' : '';
+		$result = '<section class="entry-section wp-theater-section ' . esc_attr($service) . ' ' . esc_attr($mode) . ' ' . esc_attr($atts['class']) . '"' .  $theater_data . '>';
 
 		// insert the title
-		if( $show_title && !empty( $title ) ) {
+		if($show_title && !empty($title)) {
 			$result .= '	<header>';
-			$result .= '		<h3>' . apply_filters( 'wp_theater-section_title', $title ) . '</h3>';
+			$result .= '		<h3>' . apply_filters('wp_theater-section_title', $title) . '</h3>';
 			$result .= '	</header>';
 		}
 
-		if( $show_theater ) {
+		if($show_theater) {
 			// needs to get info from the video
 			$vid = $feed->videos[0];
-			$tempatts = array_merge( $atts, array( 'mode' => 'embed', 'id' => $vid->id ) );
-			$result .= $this->theater_shortcode( $tempatts, '', $tag );
+			$tempatts = array_merge($atts, array('mode' => 'embed', 'id' => $vid->id));
+			$result .= $this->theater_shortcode($tempatts, '', $tag);
 		}
 
 		// start the listing of videos
 		$result .= '	<ul class="wp-theater-listing">';
 		$is_first = TRUE;
 
-
-		foreach( $feed->videos as $video ) {
-			$result .= $this->video_preview( $video, $atts, $is_first );
-			if( $is_first ) $is_first = FALSE;
+		foreach($feed->videos as $video) {
+			$result .= $this->video_preview($video, $atts, $is_first);
+			if($is_first) $is_first = FALSE;
 		}
 
 		$result .= '	</ul>';
 
 		// handle the more link
-		if( $show_more_link ) {
-			if( $more_url )
+		if($show_more_link) {
+			if($more_url)
 				$feed->url = $more_url;
 			if (!$more_text) $more_text = 'More ' . $title;
 
 			$result .= '	<footer class="clear">';
-			$result .= '		<a href="' . esc_url( $feed->url ) . '" title="' . esc_attr( $more_text ) . '" target="_blank" class="wp-theater-more-link">' . apply_filters( 'wp_theater-text', $more_text ) . '</span></a>';
+			$result .= '		<a href="' . esc_url($feed->url) . '" title="' . esc_attr($more_text) . '" target="_blank" class="wp-theater-more-link">' . apply_filters('wp_theater-text', $more_text) . '</span></a>';
 			$result .= '	</footer>';
 		}
 
@@ -296,19 +298,19 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string	A formatted html string that will display a single video.
 	 */
-	protected function video_preview( $video, $atts, $selected = FALSE ) {
+	protected function video_preview($video, $atts, $selected = FALSE) {
 
 		// make sure that we have an image
-		if( $atts['img_size'] == 'large' && (!isset( $video->thumbnails['large'] ) || empty( $video->thumbnails['large' ] ) ) )
+		if($atts['img_size'] == 'large' && (!isset($video->thumbnails['large']) || empty($video->thumbnails['large' ])))
 			$atts['img_size'] = 'medium';	
-		if( $atts['img_size'] == 'medium' && (!isset( $video->thumbnails['medium'] ) || empty( $video->thumbnails['medium' ] ) ) )
+		if($atts['img_size'] == 'medium' && (!isset($video->thumbnails['medium']) || empty($video->thumbnails['medium' ])))
 			$atts['img_size'] = 'small';
-		if( $atts['img_size'] == 'small' && (!isset( $video->thumbnails['small'] ) || empty( $video->thumbnails['small' ] ) ) )
+		if($atts['img_size'] == 'small' && (!isset($video->thumbnails['small']) || empty($video->thumbnails['small' ])))
 			return '';
 
 		// allow a filter hook here in case someone wants to replace this content.
-		$result = apply_filters( 'wp_theater-pre_video_preview', '', $video, $atts, $selected );
-		if( !empty( $result ) ) return $result;
+		$result = apply_filters('wp_theater-pre_video_preview', '', $video, $atts, $selected);
+		if(!empty($result)) return $result;
 
 		$wrapper_element = 'div';
 		if ($atts['mode'] != 'preview') {
@@ -316,23 +318,29 @@ class WP_Theater_Shortcodes  {
 			$wrapper_element = 'li';
 		}
 
-		if( $atts['mode'] == 'preview' && !empty( $atts['title'] ) ) {
+		if($atts['mode'] == 'preview' && !empty($atts['title'])) {
 			$video->title = $atts['title'];
 		}
 
-		$embed_atts = array('mode' => 'embed', 'modes' => array('embed' => $atts['modes']['embed']), 'id' => $video->id);
-		$result .= '	<' . $wrapper_element . ' class="video-preview ' . esc_attr( $atts['class'] ) . ( $selected ? ' selected' : '' ) . '"' . 
-		           ' data-id="' . esc_attr( $video->id ) . '"' . 
-							 ' data-embed-url="' . esc_url( $this->get_request_url( $embed_atts ) ) . '"' .
-							 ' data-embed-width="' . esc_attr( $atts['embed_width'] ) . '"' .
-							 ' data-embed-height="' . esc_attr( $atts['embed_height'] ) . '"' .
+		$embed_atts = array('mode' => 'embed', 'modes' => array('embed' => $atts['modes']['embed']), 'id' => $video->id, 'autoplay_onclick' => $atts['autoplay_onclick']);
+
+		$embed_url = $this->get_request_url($embed_atts);
+		if ($atts['autoplay_onclick'])
+			// bad idea to not parse and reformat but it's a bit too costly.
+			$embed_url .= '&autoplay=1';
+
+		$result .= '	<' . $wrapper_element . ' class="video-preview ' . esc_attr($atts['class']) . ($selected ? ' selected' : '') . '"' . 
+		           ' data-id="' . esc_attr($video->id) . '"' . 
+							 ' data-embed-url="' . esc_url($embed_url) . '"' .
+							 ' data-embed-width="' . esc_attr($atts['embed_width']) . '"' .
+							 ' data-embed-height="' . esc_attr($atts['embed_height']) . '"' .
 							 '>';
 
-		$result .= '		<a class="img-link" href="' . esc_url( $video->url ) . '" rel="nofollow" target="_blank" title="Watch ' . esc_attr( $video->title ) . '">';
-		$result .= '			<img src="' . esc_url( $video->thumbnails[$atts['img_size']] ) . '" alt="' . esc_attr( $video->title ) . '" />';
+		$result .= '		<a class="img-link" href="' . esc_url($video->url) . '" rel="nofollow" target="_blank" title="Watch ' . esc_attr($video->title) . '">';
+		$result .= '			<img src="' . esc_url($video->thumbnails[$atts['img_size']]) . '" alt="' . esc_attr($video->title) . '" />';
 		$result .= '		</a>';
-		if( $atts['show_video_title'] )
-			$result .= '		<a class="title-link" href="' . esc_url( $video->url ) . '" rel="nofollow" target="_blank" title="Watch ' . esc_attr( $video->title ) . '">' . apply_filters( 'wp_theater-video_title', $video->title ) . '</a>';
+		if($atts['show_video_title'])
+			$result .= '		<a class="title-link" href="' . esc_url($video->url) . '" rel="nofollow" target="_blank" title="Watch ' . esc_attr($video->title) . '">' . apply_filters('wp_theater-video_title', $video->title) . '</a>';
 		$result .= '	</' . $wrapper_element . '>';
 
 		return $result;
@@ -347,9 +355,9 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return array A formatted string to display an embeded iframe
 	 */
-	protected function get_iframe( $atts ) {
+	protected function get_iframe($atts) {
 		if ($atts['mode'] != 'embed') $atts['class'] = '';
-		$result = '<iframe class="wp-theater-iframe ' . esc_attr( $atts['service'] ) . ' ' . esc_attr( $atts['mode'] ) . ' ' . esc_attr( $atts['class'] ) . '" width="' . esc_attr( $atts['embed_width'] ) . '" height="' . esc_attr( $atts['embed_height'] ) . '" src="' . esc_url( $this->get_request_url( $atts ) ) . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
+		$result = '<iframe class="wp-theater-iframe ' . esc_attr($atts['service']) . ' ' . esc_attr($atts['mode']) . ' ' . esc_attr($atts['class']) . '" width="' . esc_attr($atts['embed_width']) . '" height="' . esc_attr($atts['embed_height']) . '" src="' . esc_url($this->get_request_url($atts)) . '" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowfullscreen></iframe>';
 		return $result;
 	}
 
@@ -363,36 +371,36 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string	A formatted array that should give the best chance of success
 	 */
-	protected function format_params( $atts, $content, $tag ) {
+	protected function format_params($atts, $content, $tag) {
 
 		// make attribues like [0] => 'hide_title' into ['show_title'] => FALSE
-		$atts = $this->capture_no_value_atts( $atts );
+		$atts = $this->capture_no_value_atts($atts);
 
 		// just in case someone tries to reset the modes array that is used for link formatting
-		if ( isset( $atts['modes'] ) )
+		if (isset($atts['modes']))
 			unset($atts['modes']);
 
 		$presets = WP_Theater::$presets;
 
 		// check for a preset -- atts' preset || shortcode tag as preset || service as preset || die, all empty
-		if( !isset( $atts['preset'] ) || empty( $atts['preset'] ) ) {
-			if( $tag != 'preview' && $presets->has_preset( $tag ) )
+		if(!isset($atts['preset']) || empty($atts['preset'])) {
+			if($tag != 'preview' && $presets->has_preset($tag))
 				$atts['preset'] = $tag;
-			elseif( isset( $atts['service'] ) && $presets->has_preset( $atts['service'] ) )
+			elseif(isset($atts['service']) && $presets->has_preset($atts['service']))
 				$atts['preset'] = $atts['service'];
 			else return FALSE; 
 		}
 
 		// make sure we an ID to go on -- atts' id || content as ID || die, both empty
-		if( empty( $atts['id'] ) ) {
-			if( empty( $content ) )
+		if(empty($atts['id'])) {
+			if(empty($content))
 				return FALSE;
 			else  {
-				$atts['id'] = trim( $content );
+				$atts['id'] = trim($content);
 			}
 		}
 
-		return apply_filters( 'wp_theater-format_params', $this->shortcode_atts( $presets->get_preset( $atts['preset'] ), $atts ), $content, $tag );
+		return apply_filters('wp_theater-format_params', shortcode_atts($presets->get_preset($atts['preset']), $atts), $content, $tag);
 	}
 
 	/**
@@ -403,17 +411,17 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return array The corrected array
 	 */
-	protected function capture_no_value_atts( $atts ) {
-		if( !is_array( $atts ) || !count( $atts ) ) return $atts;
+	protected function capture_no_value_atts($atts) {
+		if(!is_array($atts) || !count($atts)) return $atts;
 
 		// needs -- compile a list of these settings based on available presets -- can't do the show/hide but can do service and mode.
 		// case: $services[$value]
 		// case: $modes[$value]
 
-		foreach( $atts as $key => $value ) {
-			if( is_int( $key ) ) {
+		foreach($atts as $key => $value) {
+			if(is_int($key)) {
 
-				switch( $value ) {
+				switch($value) {
 
 					case 'youtube':
 					case 'vimeo':
@@ -445,7 +453,7 @@ class WP_Theater_Shortcodes  {
 					case 'hide_theater':
 					case 'hide_fullwindow':
 					case 'hide_lowerlights':
-						$atts['show' . substr( $value, 4 )] = FALSE;
+						$atts['show' . substr($value, 4)] = FALSE;
 					 break;
 
 					default:
@@ -457,7 +465,7 @@ class WP_Theater_Shortcodes  {
 				}
 			}
 		}
-		return apply_filters( 'wp_theater-capture_no_value_atts', $atts );
+		return apply_filters('wp_theater-capture_no_value_atts', $atts);
 	}
 
 	/**
@@ -470,12 +478,12 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return array Combined and filtered attribute list.
 	 */
-	public function shortcode_atts( $pairs, $atts ) {
+	public function shortcode_atts($pairs, $atts) {
 		$atts = (array) $atts;
 		$out = array();
 
-		foreach( $pairs as $name => $default ) {
-			if ( array_key_exists( $name, $atts ) )
+		foreach($pairs as $name => $default) {
+			if (array_key_exists($name, $atts))
 				$out[$name] = $atts[$name];
 			else
 				$out[$name] = $default;
@@ -492,52 +500,52 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return stdClass An object with details about the feed and it's videos
 	 */
-	protected function get_api_data( $atts ) {
+	protected function get_api_data($atts) {
 
 		// let people hook in here to parse their own service
-		$result = apply_filters( 'wp_theater-pre_get_api_data', '', $atts );
+		$result = apply_filters('wp_theater-pre_get_api_data', '', $atts);
 		if (!empty($result)) return $result;
 
-		$request_url = $this->get_request_url( $atts );
+		$request_url = $this->get_request_url($atts);
 
 		$ch = curl_init();
-		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-  	curl_setopt( $ch, CURLOPT_TIMEOUT, 30 );
-		curl_setopt( $ch, CURLOPT_URL, $request_url );
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  	curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		curl_setopt($ch, CURLOPT_URL, $request_url);
 
-		$response = curl_exec( $ch );
-		curl_close( $ch );
+		$response = curl_exec($ch);
+		curl_close($ch);
 
 		$result = new stdClass();
 		$videos = array();
 
 
 		// let people hook in here to parse their own service
-		$result = apply_filters( 'wp_theater-pre_parse_feed', '', $response, $atts );
+		$result = apply_filters('wp_theater-pre_parse_feed', '', $response, $atts);
 		if (!empty($result)) return $result;
 
-		switch( $atts['service'] ) {
+		switch($atts['service']) {
 
 			case 'youtube':
 
 				//parsing begins here:
-				if( !$response )
+				if(!$response)
 					return '';
-				$feed = json_decode( $response );
-				if( !isset( $feed->data ) )
+				$feed = json_decode($response);
+				if(!isset($feed->data))
 					return '';
 					
-				if( isset($feed->data->items) ) {
-					foreach( $feed->data->items as $video ) {
+				if(isset($feed->data->items)) {
+					foreach($feed->data->items as $video) {
 						// user feeds don't have a sub listing
-						$parsed_video = $this->parse_youtube_video( $atts['mode'] == 'user' ? $video : $video->video );
+						$parsed_video = $this->parse_youtube_video($atts['mode'] == 'user' ? $video : $video->video);
 						if ($parsed_video !== FALSE)
-							array_push( $videos, $parsed_video );
+							array_push($videos, $parsed_video);
 					}
 				} else {
-					$parsed_video = $this->parse_youtube_video( $feed->data );
+					$parsed_video = $this->parse_youtube_video($feed->data);
 					if ($parsed_video !== FALSE)
-						array_push( $videos, $parsed_video );
+						array_push($videos, $parsed_video);
 				}
 
 				if ($atts['mode'] == 'user')
@@ -545,17 +553,17 @@ class WP_Theater_Shortcodes  {
 				else
 					$result->title = (string) $feed->data->title;
 
-				$result->url = $this->get_more_link( $atts, isset( $feed->data->items ) ? $videos[0]->id : '' );
+				$result->url = $this->get_more_link($atts, isset($feed->data->items) ? $videos[0]->id : '');
 
 			 break;
 
 			case 'vimeo':
 
 				//parsing begins here:
-				if( !$response ) return '';
-				$feed = json_decode( $response );
-				if( !is_array( $feed ) )  return '';
-				foreach( $feed as $video ) {
+				if(!$response) return '';
+				$feed = json_decode($response);
+				if(!is_array($feed))  return '';
+				foreach($feed as $video) {
 
 					// make sure we can embed the video
 					if ($video->embed_privacy  != 'anywhere')
@@ -566,21 +574,21 @@ class WP_Theater_Shortcodes  {
 			    $video->thumbnails['medium'] = $video->thumbnail_medium;
 			    $video->thumbnails['large']  = $video->thumbnail_large;
 					// add the video
-					array_push( $videos,( object ) $video );
+					array_push($videos,(object) $video);
 				}
 
 				// we need to request the info feed as well
-				if( $atts['mode'] == 'user' || $atts['mode'] == 'channel' || $atts['mode'] == 'group' ) {
+				if($atts['mode'] == 'user' || $atts['mode'] == 'channel' || $atts['mode'] == 'group') {
 
-					$request_url = $this->get_request_url( $atts, 'info' );
+					$request_url = $this->get_request_url($atts, 'info');
 
 					$ch = curl_init();
-					curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-					curl_setopt( $ch, CURLOPT_TIMEOUT, 30 );
-					curl_setopt( $ch, CURLOPT_URL, $request_url );
+					curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+					curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+					curl_setopt($ch, CURLOPT_URL, $request_url);
 
-					$response = json_decode( curl_exec( $ch ) );
-					curl_close( $ch );
+					$response = json_decode(curl_exec($ch));
+					curl_close($ch);
 					$result = $response;
 					// just make sure we have a title named 'title'....
 
@@ -595,22 +603,12 @@ class WP_Theater_Shortcodes  {
 
 		$result->videos = $videos;
 
-		// THIS SHOULDN"T BE HERE NOW THAT ITS CACHED
-		// make sure we only have as many as we want
-		if ( isset( $atts['max'] ) && $atts['max'] !== FALSE ) {
-			$max = (int) $atts['max'];
-			if ($max >= 0 && $max < count($videos) ) {
-				$max_videos = array_slice($videos, 0, $max);
-				$result->videos = $max_videos;
-			}
-		}
-
 		return $result;
 
 	}
 
 	/**
-	 * Get a formatted string with the necessary html to embed an iframe
+	 * Get a formatted string with the necessary html to embed an iframe.  NOTE: $request and $output default values will change in the future so don't forget to define them when needed.
 	 * @since WP Theater 1.0.0
 	 *
 	 * @param array $atts The attributes required to fill in an iframe
@@ -619,18 +617,18 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string The complete request url
 	 */
-	protected function get_request_url( $atts, $request = 'videos', $output = 'json' )  {
+	protected function get_request_url($atts, $request = 'videos', $output = 'json')  {
 
 		// Allow filter to override the request url
-		$result = apply_filters( 'wp_theater-pre_get_request_url', '', $atts, $request, $output );
+		$result = apply_filters('wp_theater-pre_get_request_url', '', $atts, $request, $output);
 		if (!empty($result)) return $result;
 
 		if ($atts['mode'] == 'theater') $atts['mode'] = 'embed';
 
-		$result = str_replace( '%id%', $atts['id'], $atts['modes'][$atts['mode']] );
+		$result = str_replace('%id%', $atts['id'], $atts['modes'][$atts['mode']]);
 
-		if( isset( $atts['service'] ) && $atts['service'] == 'vimeo' ) {
-			if( $atts['mode'] != 'preview' )
+		if(isset($atts['service']) && $atts['service'] == 'vimeo') {
+			if($atts['mode'] != 'preview')
 				$result .= $request;
 			$result .= '.' . $output;
 		}
@@ -639,14 +637,14 @@ class WP_Theater_Shortcodes  {
 	}
 
 	/**
-	 * Takes an xml entry and returns the formatted array
+	 * Takes a single video entry and returns a reformatted array
 	 * @since WP Theater 1.0.0
 	 *
 	 * @param xml $video A single video SimpleXMLElement with the loaded data
 	 *
 	 * @return array An array of a single video's formatted data
 	 */
-	protected function parse_youtube_video( $video ) {
+	protected function parse_youtube_video($video) {
 
 		$result = new stdClass();
 
@@ -674,6 +672,7 @@ class WP_Theater_Shortcodes  {
 		// thumbnails
 		$result->thumbnails = array();
 		$result->thumbnails['small'] = (string) $video->thumbnail->sqDefault;
+		// don't they have a mqDefault too?
 		$result->thumbnails['large'] = (string) $video->thumbnail->hqDefault;
 
 		return $result;
@@ -687,24 +686,24 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string The complete url
 	 */
-	protected function get_more_link( $atts, $first_id = '' ) {
+	protected function get_more_link($atts, $first_id = '') {
 		
 		// Allow filter to override more link
-		$result = apply_filters( 'wp_theater-pre_get_more_link', '', $atts, $first_id );
-		if ( !empty( $result ) ) return $result;
+		$result = apply_filters('wp_theater-pre_get_more_link', '', $atts, $first_id);
+		if (!empty($result)) return $result;
 
 		$result = $atts['modes']['link'];
-		if( $atts['service'] == 'youtube' ) {
-			if( $atts['mode'] == 'user' )
+		if($atts['service'] == 'youtube') {
+			if($atts['mode'] == 'user')
 				$result .= 'user/' . $atts['id'];
 			else
 				$result .= 'watch?';
-				if( $atts['mode'] == 'embed' || $atts['mode'] == 'preview' )
+				if($atts['mode'] == 'embed' || $atts['mode'] == 'preview')
 					$result .= 'v=' . $atts['id'];
-				elseif( $atts['mode'] == 'playlist' )
+				elseif($atts['mode'] == 'playlist')
 					$result .= 'v=' . $first_id . '&list=' . $atts['id'];
 		}
-		return apply_filters( 'wp_theater-get_more_link', $result, $atts, $first_id );
+		return apply_filters('wp_theater-get_more_link', $result, $atts, $first_id);
 	}
 	/**/
 

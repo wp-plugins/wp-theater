@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.0.6
+Version: 1.0.7
 */
 
 if(defined('ABSPATH') && defined('WPINC') && !class_exists('WP_Theater')){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.0.6';
+	const VERSION = '1.0.7';
 
 	/**
 	 * Preset's class instance
@@ -37,12 +37,6 @@ class WP_Theater {
 	 * @since WP Theater 1.0.0
 	 */
 	public static $settings;
-
-	/**
-	 * Boolean for knowing when a shortcode is going to be applied. // NOT USED YET
-	 * @since WP Theater 1.0.0
-	 */
-	public static $shortcode_in_use = FALSE;
 
 	/**
 	 * Constructor
@@ -93,18 +87,7 @@ class WP_Theater {
 		define ('WP_THEATER_URI',      trailingslashit(plugin_dir_url(__FILE__)));
 		define ('WP_THEATER_INCLUDES', WP_THEATER_DIR.trailingslashit('inc'));
 		define ('WP_THEATER_ADMIN',    WP_THEATER_DIR.trailingslashit('admin'));
-	}
-
-	/**
-	 * Load the files required by this plugin.
-	 *
-	 * @since WP Theater 1.0.0
-	 */
-	protected static function includes() {
-		require_once(WP_THEATER_INCLUDES.'class-settings.php');
-		require_once(WP_THEATER_INCLUDES.'class-presets.php');
-		require_once(WP_THEATER_INCLUDES.'class-shortcodes.php');
-		require_once(WP_THEATER_INCLUDES.'filters.php');
+		// kind of pointless to define constants from within a class that can be overwritten ...
 	}
 
 	/**
@@ -114,18 +97,32 @@ class WP_Theater {
 	public static function init () {
 
 		static::constants();
-		static::includes();
 
 		register_activation_hook(  __FILE__,array(__CLASS__,'activation'  ));
 		register_deactivation_hook(__FILE__,array(__CLASS__,'deactivation'));
 		register_uninstall_hook(   __FILE__,array(__CLASS__,'uninstall'   ));
 
-		static::$settings = new WP_Theater_Settings();
-		static::$presets = new WP_Theater_Presets();
-		static::$shortcodes = new WP_Theater_Shortcodes();
+		if (is_admin()) {
+			require_once(WP_THEATER_INCLUDES.'class-settings.php');
+			static::$settings = new WP_Theater_Settings();
+		} else {
+			require_once(WP_THEATER_INCLUDES.'class-presets.php');
+			require_once(WP_THEATER_INCLUDES.'class-shortcodes.php');
+			require_once(WP_THEATER_INCLUDES.'filters.php');
+			static::$presets = new WP_Theater_Presets();
+			static::$shortcodes = new WP_Theater_Shortcodes();
+			//add_action('wp_enqueue_scripts',array(__CLASS__,'enqueue_styles'));
+			//add_action('wp_enqueue_scripts',array(__CLASS__,'enqueue_scripts'));
+		}
+	}
 
-		add_action('wp_enqueue_scripts',array(__CLASS__,'enqueue_styles'));
-		add_action('wp_enqueue_scripts',array(__CLASS__,'enqueue_scripts'));
+	/**
+	 * Single call for enqueueing(?) assets
+	 * @since WP Theater 1.0.0
+	 */
+	public static function enqueue_assets () {
+		static::enqueue_styles();
+		static::enqueue_scripts();
 	}
 
 	/**
@@ -159,7 +156,7 @@ class WP_Theater {
 	public function admin_notices_donate() {
     ?>
     <div class="updated">
-			<p>Thank you for using WP Theater. For more detail visit <a href="http://redshiftstudio.com/wp-theater/" rel="author" title="WP Theater on Redshift Studio's website">redshiftstudio.com/wp-theater/</a></p>
+			<p>Thank you for using WP Theater. For more details please visit <a href="http://redshiftstudio.com/wp-theater/" rel="author" title="WP Theater on Redshift Studio's website">redshiftstudio.com/wp-theater/</a></p>
 			<p>We put a lot of time into this plugin and hope that you'd concider donating to support continued development.<br />
 			<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU" target="_blank" rel="nofollow payment" title="Donate through PayPal"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="PayPal Donate" /></a>
 			</p>

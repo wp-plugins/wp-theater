@@ -11,8 +11,8 @@
 
 				var section = this,
 						$section = $(this),
-						service, iframe, bigscreen,
-						videos = $('.video-preview', this);
+						service, $iframe, $bigscreen,
+						$videos = $('.video-preview', this);
 
 				if($('.video-preview').length === 0)
 					return;
@@ -26,25 +26,27 @@
 
 				// if the theater does not exist look for the data-theater-id
 				if($('.wp-theater-iframe', this).length !== 0){
-					bigscreen = $('.wp-theater-bigscreen', this);
-					iframe = $('.wp-theater-iframe', this);
+					$bigscreen = $('.wp-theater-bigscreen', this);
+					$iframe = $('.wp-theater-iframe', this);
 				}else if($section.is('[data-theater-id]') && $('#'+$section.attr('data-theater-id')).length !== 0){
-					bigscreen = $('#'+$section.attr('data-theater-id'));
-					iframe = $('#'+$section.attr('data-theater-id') + ' .wp-theater-iframe');
+					$bigscreen = $('#'+$section.attr('data-theater-id'));
+					$iframe = $('#'+$section.attr('data-theater-id') + ' .wp-theater-iframe');
 				}
 
-				videos.children('a').click(function(e) { e.preventDefault(); });
+				$videos.children('a').click(function(e) { e.preventDefault(); });
 
-				videos.click(function(e) {
+				$videos.click(function(e) {
 					$('.video-preview.selected', section).removeClass('selected');
 					$(this).addClass('selected');
-					iframe.attr('src', $(this).attr('data-embed-url'));
+					$iframe.attr('src', $(this).attr('data-embed-url'));
 					h = parseInt($(this).attr('data-embed-height'));
 					w = parseInt($(this).attr('data-embed-width'));
 					ratio = w/h;
-					iframe.attr('width', w);
-					iframe.attr('height', h);
-					$('html, body').animate({scrollTop:(bigscreen.offset().top-25)+'px'}, 300);
+					$iframe.attr('width', w);
+					$iframe.attr('height', h);
+					if(!elementIsInView($bigscreen)) {
+						$('html, body').animate({scrollTop:($bigscreen.offset().top-25)+'px'}, 300);
+					}
 				});
 			});
 		}
@@ -57,25 +59,25 @@
 						$bigscreen = $(this),
 						$bigscreenInner = $('.wp-theater-bigscreen-inner', this),
 						$bigscreenOptions = $('.wp-theater-bigscreen-options', this),
-						toggle_fullwindow = $('a.fullwindow-toggle', this),
-						toggle_lights = $('a.lowerlights-toggle', this),
-						iframe = $('.wp-theater-iframe', this),
+						$toggle_fullwindow = $('a.fullwindow-toggle', this),
+						$toggle_lights = $('a.lowerlights-toggle', this),
+						$iframe = $('.wp-theater-iframe', this),
 						fullWindowTimeout = false;
 
 				$bigscreenOptions.show();
 
 				// check if there is a full window toggle button
-				if(toggle_fullwindow.length !== 0) {
-					toggle_fullwindow.click(function(e) {
+				if($toggle_fullwindow.length !== 0) {
+					$toggle_fullwindow.click(function(e) {
 						if(!$bigscreen.hasClass('fullwindow')){
 							//has to be first
 							lockScroll();
 							$bigscreen.addClass('fullwindow');
 							$body.addClass('fullwindow');
-							keepiFrameRatio(iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt(toggle_lights.height()), $bigscreenOptions);
+							keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
 						}else{
 							$bigscreen.removeClass('fullwindow');
-							iframe.attr('style', '');
+							$iframe.attr('style', '');
 							$bigscreenOptions.attr('style', '');
 							$bigscreenOptions.show();
 							// has to be last
@@ -89,7 +91,7 @@
 					$window.resize(function(){
 						if($bigscreen.hasClass('fullwindow')) {
 							fullWindowTimeout = setTimeout(function() {
-								keepiFrameRatio(iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt(toggle_lights.height()), $bigscreenOptions);
+								keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
 							}, 100);
 						} else
 							clearTimeout(fullWindowTimeout);
@@ -97,17 +99,19 @@
 				}
 
 				// check if there is a full window toggle button
-				if(toggle_lights.length !== 0) {
-					toggle_lights.click(function(e) {
+				if($toggle_lights.length !== 0) {
+					$toggle_lights.click(function(e) {
 
 						if($bigscreen.hasClass('lowerlights')){
 							$bigscreen.removeClass('lowerlights');
 							$('#wp-theater-lowerlights').fadeOut(1000, function() {
-								$('#wp-theater-lowerlights').remove();
+								$('#wp-theater-lowerlights').hide();
 							});
 						}else{
 							$bigscreen.addClass('lowerlights');
-							$body.prepend('<div id="wp-theater-lowerlights">&nbsp;</div>')
+							// NEEDS: Only add this once and reuse, IE8 bug.
+							if ($('#wp-theater-lowerlights').length == 0)
+								$body.prepend('<div id="wp-theater-lowerlights">&nbsp;</div>')
 							$('#wp-theater-lowerlights').hide().fadeIn(1000);
 						}
 
@@ -179,6 +183,16 @@
 		window.scrollTo(scrollPosition[0], scrollPosition[1]);    
 
 		$body.css({"margin-right":0,"margin-bottom":0});
+	}
+
+	function elementIsInView($elem) {
+    var docViewTop = $window.scrollTop();
+    var docViewBottom = docViewTop + $window.height();
+
+    var elemTop = $elem.offset().top;
+    var elemBottom = elemTop + $elem.height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 	}
 
 })(jQuery);

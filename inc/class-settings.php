@@ -107,7 +107,7 @@ class WP_Theater_Settings {
 
 		add_settings_field(
 			'wpts_genset_cache_life',
-			'Feed Cache Length?<br/><em>in seconds</em>', 
+			'Cache Expiration?<br/><em>in seconds</em>', 
 			array( $this, 'default_cache_fields' ),
 			'wp_theater',
 			'wpts_genset'
