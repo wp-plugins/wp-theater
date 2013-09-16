@@ -171,7 +171,6 @@ class WP_Theater_Shortcodes  {
 		return $result;
 	}
 
-	function microtime_float() {list( $usec, $sec ) = explode( " ", microtime() );return( ( float )$usec +( float )$sec );}
 	/**
 	 * Main shortcode for all YouTube integration
 	 * @since WP Theater 1.0.0
@@ -182,7 +181,6 @@ class WP_Theater_Shortcodes  {
 	 * @return string The string to be inserted in place of the shortcode.
 	 */
 	public function video_shortcode( $atts, $content = '', $tag ) {
-		$time_start = $this->microtime_float();
 
 		// let the plugin know that we need to load assets
 		if ( !WP_Theater::$shortcode_in_use ) WP_Theater::$shortcode_in_use = true;
@@ -242,9 +240,7 @@ class WP_Theater_Shortcodes  {
 		$result = apply_filters( 'wp_theater-pre_video_shortcode', '', $feed, $atts, $content, $tag );
 		if( !empty( $result ) ) return $result;
 
-		// 
-		// start formatting results
-		// 
+		// Start formatting results
 
 		$theater_data = !$show_theater && $theater_id ? ' data-theater-id="' . esc_attr( $theater_id ) . '"' : '';
 		$result = '<section class="entry-section wp-theater-section ' . esc_attr( $service ) . ' ' . esc_attr( $mode ) . ' ' . esc_attr( $atts['class'] ) . '"' .  $theater_data . '>';
@@ -288,7 +284,6 @@ class WP_Theater_Shortcodes  {
 
 		$result .= '</section>';
 
-		$time_end = $this->microtime_float(); $time = $time_end - $time_start; echo(string)( "Took: " . (string) round( $time, 3 ) . " seconds\n" );
 		return $result;
 	}
 
@@ -373,7 +368,7 @@ class WP_Theater_Shortcodes  {
 		// make attribues like [0] => 'hide_title' into ['show_title'] => FALSE
 		$atts = $this->capture_no_value_atts( $atts );
 
-		// just in case someone typos an 's' onto mode=''.
+		// just in case someone tries to reset the modes array that is used for link formatting
 		if ( isset( $atts['modes'] ) )
 			unset($atts['modes']);
 

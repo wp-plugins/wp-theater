@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.0.5
+Version: 1.0.6
 */
 
 if(defined('ABSPATH') && defined('WPINC') && !class_exists('WP_Theater')){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.0.5';
+	const VERSION = '1.0.6';
 
 	/**
 	 * Preset's class instance
@@ -65,12 +65,6 @@ class WP_Theater {
 	 */
 	public static function activation() {
 
-		// =================================================================================
-		//                                            DELETE BEFORE 1.0 !!!!!!!!!!!!!!!!!!!!
-		delete_option('wp_theater_options');
-		//                                            DELETE BEFORE 1.0 !!!!!!!!!!!!!!!!!!!!
-		// =================================================================================
-
 		// establish default settings
 		if (!get_option('wp_theater_options')) {
 
@@ -83,8 +77,6 @@ class WP_Theater {
 			);
 			add_option('wp_theater_options', $val);
 		}
-		// display an admin notice after activation -- doesn't work because activation is over.
-		//add_action('admin_notices', array(__CLASS__,'admin_notices_donate'));
 	}
 	public static function deactivation() {}
 	public static function uninstall() {
@@ -163,6 +155,7 @@ class WP_Theater {
 	 * Adds notice for admins to concider donating
 	 * @since WP Theater 1.0.0
 	 */
+	//add_action('admin_notices', array(__CLASS__,'admin_notices_donate'));
 	public function admin_notices_donate() {
     ?>
     <div class="updated">
@@ -179,55 +172,5 @@ class WP_Theater {
 
 } /* END EXISTS CHECK */
 
+// start it up
 WP_Theater::init();
-
-
-/*
-					______________________
-|         |                    |
-==========|        TODO:       |
-|         |____________________|
-
-
-VERIFY:
-* Title override of a video preview
-* More link -- if url is empty from feed...?
-* if !hide_theater && !mode='theater' && theater_id then the current theater should get the id not an data value.
-
-
-Customization
-* All Done!
-
-
-ENHANCEMENT:
-* Make the video height stay in ratio to the width -- let the scale ratio set width and always have the height built upon the tag's width/height ratio
-* Get the youtube elements back in.  Likes, Views, Durration.
-* Autoplay when preview clicked option
-
-
-PAID VERSION:
-* Create the preset UI for non coders to create their own presets.
-* Add styles for multiple column layouts and potentially a parameter and shortened parameter cols="4" vs 4col etc. ? ehh?
-* Responsive column drops -- this would be hard seeing that I don't know how large it will be displayed. -- brings up the question of image size also.
-* Multiple presets and layouts.
-* Autoplay after video finish options
-* Allow multiple service feeds to be integrated into one feed.
-
-
-TESTING SHORTCODES:
-
-VIMEO:
-[vimeo]71750718[/vimeo]
-[vimeo preview title="Custom Video Title"]71750718[/vimeo]
-[vimeo channel id="6513"]Custom Title[/vimeo]
-[vimeo group hide_more_link hide_video_title]shortfilms[/vimeo]
-[vimeo theater theater_id="my-theater" hide_lowerlights hide_fullwindow]71750718[/vimeo]
-[vimeo user theater_id="my-theater" hide_theater]2956232[/vimeo]
-
-YOUTUBE:
-[youtube]pKI5tZQeovw[/youtube]
-[youtube preview title="Custom Video Title"]pKI5tZQeovw[/youtube]
-[youtube user hide_more_link hide_video_title]MarquandR[/youtube]
-[youtube theater theater_id="my-theater" hide_lowerlights hide_fullwindow]pKI5tZQeovw[/youtube]
-[youtube playlist theater_id="my-theater" hide_theater]FLOKHwx1VCdgnxwbjyb9Iu1g[/youtube]
-*/
