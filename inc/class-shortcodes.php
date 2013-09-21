@@ -150,7 +150,7 @@ class WP_Theater_Shortcodes  {
 
 		$theater_data = ($atts['mode'] == 'theater' && $atts['theater_id']) ? ' id="' . esc_attr($atts['theater_id']) . '"' : '';
 
-		$result  = '<div class="wp-theater-bigscreen ' . esc_attr($atts['service']) . ' ' . esc_attr($atts['class']) . '" data-ratio=1.777777777' . $theater_data . '>';
+		$result  = '<div class="wp-theater-bigscreen ' . esc_attr($atts['service']) . ' ' . esc_attr($atts['class']) . '"' . $theater_data . '>';
 		$result .= '	<div class="wp-theater-bigscreen-inner">';
 		$result .= 			$content;
 		$result .= '		<div class="wp-theater-bigscreen-options">';
@@ -184,12 +184,13 @@ class WP_Theater_Shortcodes  {
 
 		// make sure all the atts are clean, setup correctly and extracted
 		$atts = $this->format_params($atts, $content, $tag);
-		if ($atts === FALSE) return '';
+		if ($atts === FALSE) return '<!-- WP Theater - format_params failed -->';
 		extract($atts);
 
 		// can we just embed an iframe?
-		if('embed' == $mode)
+		if('embed' == $mode){
 			return $this->get_iframe($atts);
+		}
 
 		// can we just embed a theater?
 		if('theater' == $mode) {
@@ -214,7 +215,7 @@ class WP_Theater_Shortcodes  {
 		}
 
 		if(empty($feed) || !isset($feed->videos) || !count($feed->videos))
-			return '';
+			return '<!-- WP Theater - API request failed -->';
 
 		// Figure out the title -- title attr first, content second, api feed third
 		if(empty($title)) {
@@ -236,7 +237,7 @@ class WP_Theater_Shortcodes  {
 		if($mode == 'preview') {
 			if (count($feed->videos == 1))
 				return $this->video_preview($feed->videos[0], $atts);
-			else return '';
+			else return '<!-- WP Theater - Not enough data for preview -->';
 		}
 
 		// allow a filter to replace the output.
@@ -399,8 +400,19 @@ class WP_Theater_Shortcodes  {
 				$atts['id'] = trim($content);
 			}
 		}
+		
+		$result = apply_filters('wp_theater-format_params', shortcode_atts($presets->get_preset($atts['preset']), $atts), $content, $tag);
 
-		return apply_filters('wp_theater-format_params', shortcode_atts($presets->get_preset($atts['preset']), $atts), $content, $tag);
+		// make sure the link format is available for the requested mode
+		if(!isset($result['mode']) || empty($result['mode'])) {
+			return FALSE;
+		}
+		$mode = $result['mode'] == 'theater' ? 'embed' : $result['mode'];
+		if(!isset($result['modes'][$mode]) || empty($result['modes'][$mode])) {
+			return FALSE;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -627,7 +639,7 @@ class WP_Theater_Shortcodes  {
 
 		$result = str_replace('%id%', $atts['id'], $atts['modes'][$atts['mode']]);
 
-		if(isset($atts['service']) && $atts['service'] == 'vimeo') {
+		if(isset($atts['service']) && $atts['service'] == 'vimeo' && $atts['mode'] != 'embed') {
 			if($atts['mode'] != 'preview')
 				$result .= $request;
 			$result .= '.' . $output;
