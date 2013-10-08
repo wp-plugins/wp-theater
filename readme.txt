@@ -16,7 +16,9 @@ For a better looking explanation and parameter usage please visit:
 
 http://redshiftstudio.com/wp-theater/
 
-= Usage =  *ignore/remove the extra spaces that I can't get rid of here*
+= Usage =
+*ignore/remove the extra spaces that I can't get rid of here*
+
 **Boring Embed** - The classic
 `[youtube]VideoID[/youtube]
 [vimeo]VideoID[/vimeo]`
