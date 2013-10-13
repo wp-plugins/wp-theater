@@ -61,7 +61,7 @@ Existing presets are:
 = Requirements =
 
 1. Tested on WordPress version 3.6 and later.  Does not support Multisite, yet
-1. PHP 5 with curl
+1. PHP 5.3 or later with curl
 
 
 = TODO FOR 1.1.0 =
