@@ -42,6 +42,8 @@
 			}else if($section.is('[data-theater-id]') && $('#'+$section.attr('data-theater-id')).length !== 0){
 				$bigscreen = $('#'+$section.attr('data-theater-id'));
 				$iframe = $('#'+$section.attr('data-theater-id') + ' .wp-theater-iframe');
+			}else {
+				return;
 			}
 
 			$videos.children('a').click(function(e) { e.preventDefault(); });
@@ -55,6 +57,7 @@
 				ratio = w/h;
 				$iframe.attr('width', w);
 				$iframe.attr('height', h);
+				$iframe.trigger('changed');
 				if(!elementIsInView($bigscreen)) {
 					$('html, body').animate({scrollTop:($bigscreen.offset().top-25)+'px'}, 300);
 				}
@@ -71,10 +74,15 @@
 					$bigscreenOptions = $('.wp-theater-bigscreen-options', this),
 					$toggle_fullwindow = $('a.fullwindow-toggle', this),
 					$toggle_lights = $('a.lowerlights-toggle', this),
-					$iframe = $('.wp-theater-iframe', this),
+					$iframe,
 					fullWindowTimeout = false;
 
+			if ($('.wp-theater-iframe', this).length !== 0)
+				$iframe = $('.wp-theater-iframe', this);
+			else return;
+
 			$bigscreenOptions.show();
+			iframeHeightAuto($iframe);
 
 			// check if there is a full window toggle button
 			if($toggle_fullwindow.length !== 0) {
@@ -82,6 +90,7 @@
 					if(!$bigscreen.hasClass('fullwindow')){
 						//has to be first
 						lockScroll();
+						$iframe.attr('style', '');
 						$bigscreen.addClass('fullwindow');
 						$body.addClass('fullwindow');
 						keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
@@ -90,23 +99,27 @@
 						$iframe.attr('style', '');
 						$bigscreenOptions.attr('style', '');
 						$bigscreenOptions.show();
+						iframeHeightAuto($iframe);
 						// has to be last
 						unlockScroll();
 					}
-
 					e.preventDefault();
 				});
-
-				// should get this outside the above .each() loop
-				$window.resize(function(){
-					if($bigscreen.hasClass('fullwindow')) {
-						fullWindowTimeout = setTimeout(function() {
-							keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
-						}, 100);
-					} else
-						clearTimeout(fullWindowTimeout);
-				});
 			}
+
+			$window.resize(function(){
+				if($bigscreen.hasClass('fullwindow')) {
+					fullWindowTimeout = setTimeout(function() {
+						keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
+					}, 100);
+				} else if (typeof $bigscreen.attr('data-keepratio') !== "undefined") {	
+					fullWindowTimeout = setTimeout(function() {
+						iframeHeightAuto($iframe);
+					}, 100);
+				} else {
+					clearTimeout(fullWindowTimeout);
+				}
+			});
 
 			// check if there is a full window toggle button
 			if($toggle_lights.length !== 0) {
@@ -131,19 +144,29 @@
 		});
 	}
 
+	function iframeHeightAuto(iframe) {
+		var width = parseInt(iframe.width()),
+				height = parseInt(iframe.height()),
+				awidth = parseInt(iframe.attr('width')),
+				aheight = parseInt(iframe.attr('height'));
+		var ratio = awidth/aheight;
+
+		iframe.height(width/(awidth/aheight));
+	}
+
 	function keepiFrameRatio(iframe, maxWidth, maxHeight, details) { /* had to put details in or update it each time above ^ */
 
 		var maxWidth = parseInt(maxWidth),
 				maxHeight = parseInt(maxHeight);
-		//var result = scaleRatio(parseInt(iframe.attr('width'))/parseInt(iframe.attr('height')), maxWidth-40, maxHeight-30);
-		var result = scaleRatio(1.777777777, maxWidth-40, maxHeight-40);
+		var result = scaleRatio(parseInt(iframe.attr('width'))/parseInt(iframe.attr('height')), maxWidth-40, maxHeight-30);
+		//var result = scaleRatio(1.777777777, maxWidth-40, maxHeight-40);
 
 		details.css("width" , Math.round(result.width)+"px");
 		iframe.css("width" , Math.round(result.width)+"px");
 		iframe.css("height" , Math.round(result.height)+"px");
 		details.css("margin-left" , Math.round(result.x+20)+"px");
 		iframe.css("margin-left" , Math.round(result.x+20)+"px");
-		iframe.css("margin-top" , Math.round(result.y+30)+"px");
+		iframe.css("margin-top" , Math.round(result.y+15)+"px");
 	}
 
 	function scaleRatio(ratio, targetWidth, targetHeight) {
