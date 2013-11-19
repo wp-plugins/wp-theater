@@ -1,18 +1,18 @@
 ﻿=== WP Theater ===
 Contributors: kentfarst
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU
-Tags: video, shortcode, embed, channel, playlist, group, user, youtube, vimeo, lower lights, full window, preset
+Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo user, youtube, vimeo, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe, youtube api, vimeo api,
 Requires at least: 3.6
-Tested up to: 3.6.1
-Stable tag: 1.1.0
+Tested up to: 3.7.1
+Stable tag: 1.1.1
 License: GPLv3
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
 
 == Description ==
-WP Theater provides shortcodes for integrating **YouTube** and **Vimeo** videos and feeds. Some options include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, user uploads and groups.  WP Theater was built with developers in mind, those who need flexibility. With that said, great effort was put into making sure this plugin stayed simple.
+WP Theater provides shortcodes for integrating **YouTube** and **Vimeo** video embeds and feeds into your posts or widgets. Some options include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, user uploads and groups.  WP Theater was built with developers in mind, those who need flexibility. With that said, great effort was put into making sure this plugin stayed simple.
 
-For parameter and usage please visit:
+For parameters and their usage please visit:
 
 http://redshiftstudio.com/wp-theater/
 
@@ -60,31 +60,21 @@ http://redshiftstudio.com/wp-theater/
 `
 
 
-= Presets =
-Presets fill parameters with an appropriate default, including the service.  Built in presets are also set as their own shortcode and can be used as the shortcode's tag. e.g. *[youtube_widget ... ]*.  Presets are useful because they cna be changed at anytime without you needing to edit posts.
-
-Existing presets are:
-
-* youtube
-* vimeo
-* youtube_widget
-* vimeo_widget
-
-
 = Requirements =
 
-1. Tested on WordPress version 3.6 and later.  Does not support Multisite
+1. Tested on WordPress version 3.6 and later.  Does not support Multisite, yet.
 1. PHP 5.3 or later with cURL
-
-= TODO for 1.2.0 =
-
-Make mobile friendly -- mobile embed urls, links and image sizes
-Make multi-site friendly
 
 == Frequently Asked Questions ==
 
 = Can I use this plugin to show private content from my YouTube or Vimeo account? =
 No, this plugin will only show publically available content.  This feature will be part of the advanced plugin which is currently in development along side this plugin.  If you need this feature now you are looking for a plugin that requires an API key from that service.
+
+= Can I get single previews to display in the theater when clicked? =
+Not right now.  Single previews, e.g. [vimeo preview], are really only meant as a nice way to link to a video.
+
+= Can I build a listing from multiple video IDs, e.g. [youtube theater]id1,id2,id3,id4,etc[/youtube]? =
+No, we suggest using playlists or channels for this task.  Benifits of both are the ability to add another user's video as well as reordering them directly from YouTube or Vimeo.
 
 = What settings can be changed? =
 Outside of the shortcode's parameters there are settings for you to disable the loaded assets as well setting cache expirations.
@@ -251,6 +241,12 @@ object
 
 == Changelog ==
 
+
+= 1.1.1 (11/18/2013) =
+
+* Fixed for cache expiration setting being ignored.
+* Fixed shortened paramaters *dont_keep_ratio* and *dont_autoplay_onclick* to work as expected.
+
 = 1.1.0 (10/17/2013) =
 
 * Fixed instances where private YouTube videos would cause an error.
@@ -314,5 +310,5 @@ object
 
 == Upgrade Notice ==
 
-= 1.1.0 =
-Reference the changelog before updating.  Some styling may have changed.
+= 1.1.1 =
+Fix for cache expiration

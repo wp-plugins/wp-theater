@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.1.0
+Version: 1.1.1
 */
 
 if( defined( 'ABSPATH' ) && defined( 'WPINC' ) && !class_exists( 'WP_Theater' ) ){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.1.0';
+	const VERSION = '1.1.1';
 
 	/**
 	 * Plugin directory
@@ -186,7 +186,7 @@ class WP_Theater {
 	 * Returns cURL extension not installed notice
 	 * @since WP Theater 1.1.0
 	 */
-	public static function admin_notice_deactivation_curl() {		
+	public static function admin_notice_deactivation_curl() {
     ?>
     <div class="error">
 			<p><strong>WP Theater</strong> requires the PHP <strong>cURL</strong> extension, and has been deactivated!</p>

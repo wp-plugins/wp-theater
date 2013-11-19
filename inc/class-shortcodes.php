@@ -183,7 +183,7 @@ class WP_Theater_Shortcodes  {
 		$cache_life = isset($options['cache_life']) ? (int) $options['cache_life'] : 0;
 
 		// set the transient data for this feed
-		if($mode != 'preview' && $cache_life == 0) {
+		if($mode != 'preview' && $cache_life !== 0) {
 			$transient_name = 'wp_theater_transient_feed_' . $service . '_' . $mode . '_' . $id;
 			if (false === ($feed = get_transient($transient_name))) {
 				$feed = $this->get_api_data($atts);
@@ -244,7 +244,7 @@ class WP_Theater_Shortcodes  {
 		if($show_theater) {
 			// needs to get info from the video
 			$vid = $feed->videos[0];
-			$tempatts = array_merge($atts, array('mode' => 'embed', 'id' => $vid->id));
+			$tempatts = array_merge($atts, array('mode' => 'embed', 'id' => $vid->id)); // TODO: don't reset this as embed
 			if ($tempatts['embed_width'] === FALSE || $tempatts['embed_height'] === FALSE) {
 				$tempatts['embed_width'] = $vid->width;
 				$tempatts['embed_height'] = $vid->height;
@@ -299,7 +299,7 @@ class WP_Theater_Shortcodes  {
 		if (!preg_match('/<iframe.*>/', $content))
 				$content = $this->get_iframe($atts);
 		else {
-			// need to make sure the rest of the default iframe stuff is here
+			// TODO: make sure the rest of the default iframe stuff exists
 		}
 
 		// construct the attributes and classes
@@ -366,20 +366,21 @@ class WP_Theater_Shortcodes  {
 
 		$embed_url = $this->get_request_url($embed_atts);
 		if ($atts['autoplay_onclick'])
-			// bad idea to not parse and reformat but it's a bit too costly.
+			// bad idea to not parse and reformat but it's a bit costly.
 			$embed_url .= '&autoplay=1';
 
 		$class = ' service-' . $atts['service'] . ' mode-' . $atts['mode'] . ' preset-' . $atts['preset'] . ' ' . $atts['classes']['preview'] . ($selected ? ' selected' : ''); 
 		if ($atts['mode'] == 'preview')
 			$class .= ' ' . $atts['class'];
 
-		$result .= '	<' . $wrapper_element . ' class="video-preview' . esc_attr($class) . '"' . 
-		           ' data-id="' . esc_attr($video->id) . '"' . 
+		$result .= '	<' . $wrapper_element . ' class="video-preview' . esc_attr($class) . '"';
+		if ($atts['mode'] !== 'preview') {
+		$result .= ' data-id="' . esc_attr($video->id) . '"' . 
 							 ' data-embed-url="' . esc_url($embed_url) . '"' .
 							 ' data-embed-width="' . esc_attr($video->width) . '"' .
-							 ' data-embed-height="' . esc_attr($video->height) . '"' .
-
-							 '>';
+							 ' data-embed-height="' . esc_attr($video->height) . '"';
+		}
+		$result .= '>';
 
 		$result .= '		<a class="img-link" href="' . esc_url($video->url) . '" rel="external nofollow" target="_blank" title="Watch ' . esc_attr($video->title) . '">';
 		$result .= '			<img src="' . esc_url($video->thumbnails[$atts['img_size']]) . '" alt="' . esc_attr($video->title) . '" />';
@@ -419,7 +420,8 @@ class WP_Theater_Shortcodes  {
 	 * @param string $content The shortcode's content
 	 * @param string $tag The tag that called the shortcode
 	 *
-	 * @return string	A formatted array that should give the best chance of success
+	 * @return array	A formatted array that should give the best chance of success
+	 * NEEDS: strings returned swapped out with wp_error
 	 */
 	protected function format_params($atts, $content, $tag) {
 
@@ -443,12 +445,12 @@ class WP_Theater_Shortcodes  {
 			else return 'Preset not found'; 
 		}
 
-		// make sure we an ID to go on -- atts' id || content as ID || die, both empty
+		// make sure we have an ID to go on -- atts' id || content as ID || die, both empty
 		if(empty($atts['id'])) {
 			if(empty($content))
 				return 'ID not found';
 			else  {
-				$atts['id'] = trim($content);
+				$atts['id'] = trim($content); // TODO: I think this is done multiple times
 			}
 		}
 
@@ -519,9 +521,12 @@ class WP_Theater_Shortcodes  {
 					case 'hide_theater':
 					case 'hide_fullwindow':
 					case 'hide_lowerlights':
+						$atts['show' . substr($value, 4)] = FALSE;
+					 break;
+
 					case 'dont_keep_ratio':
 					case 'dont_autoplay_onclick':
-						$atts['show' . substr($value, 4)] = FALSE;
+						$atts[substr($value, 5)] = FALSE;
 					 break;
 
 					case '1cols':
@@ -530,8 +535,7 @@ class WP_Theater_Shortcodes  {
 					case '4cols':
 					case '5cols':
 					case '6cols':
-						$cols = (int) substr($value, 1);
-						$atts['columns'] = $cols;
+						$atts['columns'] = (int) substr($value, 1);
 					 break;
 
 					default:
@@ -594,7 +598,6 @@ class WP_Theater_Shortcodes  {
 
 		$result = new stdClass();
 		$videos = array();
-
 
 		// let people hook in here to parse their own service
 		$result = apply_filters('wp_theater-pre_parse_feed', '', $response, $atts);
