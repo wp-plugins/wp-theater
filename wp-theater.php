@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.1.1
+Version: 1.1.2
 */
 
 if( defined( 'ABSPATH' ) && defined( 'WPINC' ) && !class_exists( 'WP_Theater' ) ){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.1.1';
+	const VERSION = '1.1.2';
 
 	/**
 	 * Plugin directory
@@ -81,11 +81,12 @@ class WP_Theater {
 		if ( !get_option( 'wp_theater_options' ) ) {
 
 			$val = array( 
+				'version' => '1.0.0', 
 				'load_css' => '1', 
 				'load_js' => '1', 
 				'load_genericons' => '1', 
 				'cache_life' => 14400, 
-				'show_activate_notice' => '1', 
+				'show_activate_notice' => '1'
 			 );
 			add_option( 'wp_theater_options', $val );
 
@@ -138,13 +139,14 @@ class WP_Theater {
 		if ( is_admin() ) {
 			// handle new activation
 			add_action( 'load-plugins.php', array( __CLASS__, 'activate_check' ) );
+
 			require_once( static::$inc . 'class-settings.php' );
-			static::$settings = new WP_Theater_Settings();
+			static::$settings   = new WP_Theater_Settings();
 		} else {
 			require_once( static::$inc . 'class-presets.php' );
 			require_once( static::$inc . 'class-shortcodes.php' );
 			require_once( static::$inc . 'filters.php' );
-			static::$presets = new WP_Theater_Presets();
+			static::$presets    = new WP_Theater_Presets();
 			static::$shortcodes = new WP_Theater_Shortcodes();
 		}
 	}
@@ -202,10 +204,8 @@ class WP_Theater {
 	public static function admin_notice_activation() {
     ?>
     <div class="updated" style="padding:6px;">
-			<a style="float:right;padding:24px;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU" target="_blank" rel="nofollow payment" title="Donate through PayPal"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="PayPal Donate" /></a>
+			<a style="float:right;padding:6px;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU" target="_blank" rel="nofollow payment" title="Donate through PayPal"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="PayPal Donate" /></a>
 			<p>Thank you for using WP Theater.  For more usage information please visit <a href="http://redshiftstudio.com/wp-theater/" rel="author" title="WP Theater on Redshift Studio's website">redshiftstudio.com/wp-theater/</a></p>
-			<p>If you find this plugin useful you might concider donating to support continued development.  If we reach our funding goal, mentioned on the website linked above, then the advanced features will be added to this plugin and released for FREE!
-			</p>
     </div>
     <?php
 		$option = get_option( 'wp_theater_options' );
@@ -236,7 +236,7 @@ class WP_Theater {
 		// Add Genericons font, used in the main stylesheet IF it's not queued up already
 		$load_gi = ( isset( $options['load_genericons'] ) ) ? $options['load_genericons'] : '';
 		if ( (int) $load_gi == 1 && !wp_style_is( 'genericons', 'registered' ) && !wp_style_is( 'genericons', 'enqueued' ) )
-			wp_enqueue_style( 'genericons', static::$uri . '/fonts/genericons.css', array(), '2.09' );
+			wp_enqueue_style( 'genericons', static::$uri . '/fonts/genericons.css', array(), '3.02' );
 	}
 
 	/**

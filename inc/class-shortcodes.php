@@ -40,6 +40,7 @@ class WP_Theater_Shortcodes  {
 			'columns' => 3,
 			'max' => 12,
 			'autoplay_onclick' => TRUE,
+			'link_to_embed' => FALSE,
 
 			// Title options
 			'show_title' => TRUE,
@@ -70,7 +71,7 @@ class WP_Theater_Shortcodes  {
 		));
 
 		// Add YouTube preset
-		$presets->set_preset('youtube', $this->shortcode_atts($presets->get_preset('default'), array(
+		$presets->set_preset('youtube', shortcode_atts($presets->get_preset('default'), array(
 			'service'  => 'youtube',
 			'img'      => 0,
 			'img_size' => 'medium', // tests fallback -- YouTube has only small and large
@@ -86,7 +87,7 @@ class WP_Theater_Shortcodes  {
 		)));
 
 		// Add Vimeo preset
-		$presets->set_preset('vimeo', $this->shortcode_atts($presets->get_preset('default'), array(
+		$presets->set_preset('vimeo', shortcode_atts($presets->get_preset('default'), array(
 			'service'  => 'vimeo',
 			'img'      => 0,
 			'img_size' => 'medium',
@@ -104,7 +105,7 @@ class WP_Theater_Shortcodes  {
 		// widget presets as a temp work around until I can make them proper -- cachable -- widgets
 
 		// Add YouTube preset for sidebars
-		$presets->set_preset('youtube_widget', $this->shortcode_atts($presets->get_preset('youtube'), array(
+		$presets->set_preset('youtube_widget', shortcode_atts($presets->get_preset('youtube'), array(
 			'embed_width' => 360,
 			'embed_height' => 170,
 			'max' => 9,
@@ -116,8 +117,8 @@ class WP_Theater_Shortcodes  {
 			'show_lowerlights' => FALSE,
 		)));
 
-		// Add YouTube preset for sidebars
-		$presets->set_preset('vimeo_widget', $this->shortcode_atts($presets->get_preset('vimeo'), array(
+		// Add Vimeo preset for sidebars
+		$presets->set_preset('vimeo_widget', shortcode_atts($presets->get_preset('vimeo'), array(
 			'embed_width' => 360,
 			'embed_height' => 170,
 			'max' => 9,
@@ -184,14 +185,15 @@ class WP_Theater_Shortcodes  {
 
 		// set the transient data for this feed
 		if($mode != 'preview' && $cache_life !== 0) {
-			$transient_name = 'wp_theater_transient_feed_' . $service . '_' . $mode . '_' . $id;
-			if (false === ($feed = get_transient($transient_name))) {
+			$transient_name = 'wp_theater-' . $service . '_' . $mode . '_' . $id;			
+			$feed = get_transient($transient_name);
+			// some feeds cause serialization errors and any fix results in unreliable data
+			// source seems to be special characters in video descriptions
+			if (false === $feed || is_string($feed)) {
 				$feed = $this->get_api_data($atts);
-
-				if(!isset($feed->videos) || !count($feed->videos))
+				if(!isset($feed->videos) || !count($feed->videos)) {
 					return '<!-- WP Theater - API request failed -->';
-
-				set_transient($transient_name, $feed, $cache_life);
+				}
 			}
 		}else{
 			$feed = $this->get_api_data($atts);
@@ -382,7 +384,7 @@ class WP_Theater_Shortcodes  {
 		}
 		$result .= '>';
 
-		$result .= '		<a class="img-link" href="' . esc_url($video->url) . '" rel="external nofollow" target="_blank" title="Watch ' . esc_attr($video->title) . '">';
+		$result .= '		<a class="img-link" href="' . esc_url($atts['link_to_embed'] ? $embed_url: $video->url) . '" rel="external nofollow" target="_blank" title="' . esc_attr($video->title) . '">';
 		$result .= '			<img src="' . esc_url($video->thumbnails[$atts['img_size']]) . '" alt="' . esc_attr($video->title) . '" />';
 		$result .= '		</a>';
 		if($atts['show_video_title'])
@@ -535,7 +537,7 @@ class WP_Theater_Shortcodes  {
 					case '4cols':
 					case '5cols':
 					case '6cols':
-						$atts['columns'] = (int) substr($value, 1);
+						$atts['columns'] = (int) substr($value, 0, 1);
 					 break;
 
 					default:
@@ -544,32 +546,6 @@ class WP_Theater_Shortcodes  {
 			}
 		}
 		return apply_filters('wp_theater-capture_no_value_atts', $atts);
-	}
-
-	/**
-	 * Combine user attributes with known attributes and fill in defaults when needed.
-	 * @since WP Theater 1.0.0
-	 *
-	 * @param array $pairs Entire list of supported attributes and their defaults.
-	 * @param array $atts User defined attributes in shortcode tag.
-	 * @param string $shortcode Optional. The name of the shortcode, provided for context to enable filtering
-	 *
-	 * @return array Combined and filtered attribute list.
-	 */
-
-	// needs removed all together or integrated with format_params and capture_no_value_atts
-	public function shortcode_atts($pairs, $atts) {
-		$atts = (array) $atts;
-		$out = array();
-
-		foreach($pairs as $name => $default) {
-			if (array_key_exists($name, $atts))
-				$out[$name] = $atts[$name];
-			else
-				$out[$name] = $default;
-		}
-
-		return $out;
 	}
 
 	/**
@@ -751,7 +727,7 @@ class WP_Theater_Shortcodes  {
 		// thumbnails
 		$result->thumbnails = array();
 		$result->thumbnails['small'] = (string) $video->thumbnail->sqDefault;
-		// don't they have a mqDefault too?
+		// don't they have a mqDefault too? But not in this response... Sweet Youtube! Sweet!
 		$result->thumbnails['large'] = (string) $video->thumbnail->hqDefault;
 
 		return $result;

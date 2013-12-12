@@ -1,10 +1,10 @@
 ﻿=== WP Theater ===
 Contributors: kentfarst
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU
-Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo user, youtube, vimeo, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe, youtube api, vimeo api,
+Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo user, youtube, vimeo, youtube api, vimeo api, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
-Tested up to: 3.7.1
-Stable tag: 1.1.0
+Tested up to: 3.8-beta-1
+Stable tag: 1.1.2
 License: GPLv3
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
@@ -30,7 +30,7 @@ http://redshiftstudio.com/wp-theater/
 [vimeo preview]VideoID[/vimeo]
 `
 
-**Theater** - Traditional embed that's wrapped for styling and has optional Lower Lights and Full Window buttons.
+**Theater** - Traditional embed that's wrapped for styling, has optional Lower Lights and Full Window buttons, and is responsive.
 `
 [youtube theater]VideoID[/youtube]
 [vimeo theater]VideoID[/vimeo]
@@ -84,6 +84,9 @@ Outside of the shortcode's parameters there are settings for you to disable the 
 * *Use Default JS* - You can choose to disable the built in JS file so that you can write your own.
 * *Cache Expiration* - Feeds are cached using the Transient API and this setting will set the expiration.  A value of 0 (zero) will bypass caching.
 
+= My shortcode looks correct but does not seem to be loading or I notice that it is not making use of the transient cache =
+Try changing the Transitent Expiration setting to 0.  Please inform me through the support forums if this solves the issue along with the shortcode usage.  Some issues exist with caching data when certain special characters are used in a video's description (hearts, etc.).  If you are the owner of video's with these characters I would suggest that you remove those characters until the issue is sorted out.
+
 = How can I futher customize this plugin =
 Please check the Other Notes section for futher development information.
 
@@ -121,7 +124,7 @@ Content
 Presets
 
 * "wp_theater-get_preset" ( $name )
-* "wp_theater-set_preset" ( $name, $arr )
+* "wp_theater-set_preset" ( $arr, $name )
 
 = How do I add my own preset? =
 The following code will create a preset named "my_preset".  We do not currently, but are planning to, offer a method of saving presets to the database so that they stick around between theme's.
@@ -242,10 +245,16 @@ object
 == Changelog ==
 
 
+= 1.1.2 (12/11/2013) =
+
+* Fixed transient names exceeding the 45 character limit.
+* Fixed transient cache to bypass cached data when that data is malformed. Usually caused by special characters in a video's description -- hearts etc.)
+* Fixed shorthand paramaters *dont_keep_ratio* and *dont_autoplay_onclick* to work as expected.
+* Fixed shorthand columns parameters -- 1cols, 2cols 3cols, etc.
+
 = 1.1.1 (11/18/2013) =
 
-* Fixed for cache expiration setting being ignored.
-* Fixed shortened paramaters *dont_keep_ratio* and *dont_autoplay_onclick* to work as expected.
+* Fumbled update with a side of facepalm.
 
 = 1.1.0 (10/17/2013) =
 
@@ -311,4 +320,4 @@ object
 == Upgrade Notice ==
 
 = 1.1.1 =
-Fix for cache expiration
+Fixes for cache expiration
