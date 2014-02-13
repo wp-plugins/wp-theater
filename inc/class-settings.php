@@ -10,12 +10,6 @@ class WP_Theater_Settings {
 	protected $page = '';
 
 	/**
-	 * Constructor
-	 * @since WP Theater 1.0.0
-	 */
-	public function WP_Theater_Settings () { __construct(); }
-
-	/**
 	 * Constructs
 	 * @since WP Theater 1.0.0
 	 */

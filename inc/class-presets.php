@@ -10,12 +10,6 @@ class WP_Theater_Presets {
 	protected $presets = array();
 
 	/**
-	 * Constructor
-	 * @since WP Theater 1.0.0
-	 */
-	public function WP_Theater_Presets () { __construct(); }
-
-	/**
 	 * Constructs
 	 * @since WP Theater 1.0.0
 	 */
@@ -60,7 +54,7 @@ class WP_Theater_Presets {
 	public function set_preset ( $name, $arr ) { $this->presets[$name] = apply_filters( 'wp_theater-set_preset', $arr, $name ); }
 
 	/**
-	 * Get the array of preset attributes for the media shortcode
+	 * Remove a preset with a given name (Will be expanded upon once these are stored as options)
 	 * @since WP Theater 1.0.0
 	 *
 	 * @param string $name The preset's unique name

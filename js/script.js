@@ -52,14 +52,22 @@
 				$('.video-preview.selected', section).removeClass('selected');
 				$(this).addClass('selected');
 				$iframe.attr('src', $(this).attr('data-embed-url'));
-				h = parseInt($(this).attr('data-embed-height'));
-				w = parseInt($(this).attr('data-embed-width'));
-				ratio = w/h;
-				$iframe.attr('width', w);
-				$iframe.attr('height', h);
+				$iframe.attr('width', parseInt($(this).attr('data-embed-width')));
+				$iframe.attr('height', parseInt($(this).attr('data-embed-height')));
 				$iframe.trigger('changed');
 				if(!elementIsInView($bigscreen)) {
-					$('html, body').animate({scrollTop:($bigscreen.offset().top-25)+'px'}, 300);
+					var h = $bigscreen.offset().top;
+					if ($body.hasClass('masthead-fixed')) {
+						h -= parseInt($('#masthead').height());
+					}
+					if ($('#wpadminbar').length) {
+						h -= parseInt($('#wpadminbar').height());
+					}
+						
+					// get height of masthead and add it to our 25px
+					$('html, body').animate({
+						scrollTop:Math.round(h-15)+'px'
+					}, 300);
 				}
 			});
 		});
@@ -82,26 +90,26 @@
 			else return;
 
 			$bigscreenOptions.show();
-			iframeHeightAuto($iframe);
+			wp_theater_iframeHeightAuto($iframe);
 
 			// check if there is a full window toggle button
 			if($toggle_fullwindow.length !== 0) {
 				$toggle_fullwindow.click(function(e) {
 					if(!$bigscreen.hasClass('fullwindow')){
 						//has to be first
-						lockScroll();
+						wp_theater_lockScroll();
 						$iframe.attr('style', '');
 						$bigscreen.addClass('fullwindow');
 						$body.addClass('fullwindow');
-						keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
+						wp_theater_keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
 					}else{
 						$bigscreen.removeClass('fullwindow');
 						$iframe.attr('style', '');
 						$bigscreenOptions.attr('style', '');
 						$bigscreenOptions.show();
-						iframeHeightAuto($iframe);
+						wp_theater_iframeHeightAuto($iframe);
 						// has to be last
-						unlockScroll();
+						wp_theater_unlockScroll();
 					}
 					e.preventDefault();
 				});
@@ -110,11 +118,11 @@
 			$window.resize(function(){
 				if($bigscreen.hasClass('fullwindow')) {
 					fullWindowTimeout = setTimeout(function() {
-						keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
+						wp_theater_keepiFrameRatio($iframe, parseInt($bigscreenInner.width()), parseInt($bigscreenInner.height()) - parseInt($toggle_lights.height()), $bigscreenOptions);
 					}, 100);
 				} else if (typeof $bigscreen.attr('data-keepratio') !== "undefined") {	
 					fullWindowTimeout = setTimeout(function() {
-						iframeHeightAuto($iframe);
+						wp_theater_iframeHeightAuto($iframe);
 					}, 100);
 				} else {
 					clearTimeout(fullWindowTimeout);
@@ -144,7 +152,7 @@
 		});
 	}
 
-	function iframeHeightAuto(iframe) {
+	function wp_theater_iframeHeightAuto(iframe) {
 		var width = parseInt(iframe.width()),
 				height = parseInt(iframe.height()),
 				awidth = parseInt(iframe.attr('width')),
@@ -154,12 +162,12 @@
 		iframe.height(width/(awidth/aheight));
 	}
 
-	function keepiFrameRatio(iframe, maxWidth, maxHeight, details) { /* had to put details in or update it each time above ^ */
+	function wp_theater_keepiFrameRatio(iframe, maxWidth, maxHeight, details) { /* had to put details in or update it each time above ^ */
 
 		var maxWidth = parseInt(maxWidth),
 				maxHeight = parseInt(maxHeight);
-		var result = scaleRatio(parseInt(iframe.attr('width'))/parseInt(iframe.attr('height')), maxWidth-40, maxHeight-30);
-		//var result = scaleRatio(1.777777777, maxWidth-40, maxHeight-40);
+		var result = wp_theater_scaleRatio(parseInt(iframe.attr('width'))/parseInt(iframe.attr('height')), maxWidth-40, maxHeight-30);
+		//var result = wp_theater_scaleRatio(1.777777777, maxWidth-40, maxHeight-40);
 
 		details.css("width" , Math.round(result.width)+"px");
 		iframe.css("width" , Math.round(result.width)+"px");
@@ -169,7 +177,7 @@
 		iframe.css("margin-top" , Math.round(result.y+15)+"px");
 	}
 
-	function scaleRatio(ratio, targetWidth, targetHeight) {
+	function wp_theater_scaleRatio(ratio, targetWidth, targetHeight) {
 		var result = {};
 
 		if(ratio >= targetWidth/targetHeight) {
@@ -189,7 +197,7 @@
 		return result;
 	}
 
-	function lockScroll(){
+	function wp_theater_lockScroll(){
 
 		var initWidth = $body.outerWidth(),
 				initHeight = $body.outerHeight(),
@@ -208,7 +216,7 @@
 		$body.css({'margin-right': marginR,'margin-bottom': marginB});
 	} 
 
-	function unlockScroll(){
+	function wp_theater_unlockScroll(){
 		$html.css('overflow', $html.data('previous-overflow'));
 		var scrollPosition = $html.data('scroll-position');
 		window.scrollTo(scrollPosition[0], scrollPosition[1]);    

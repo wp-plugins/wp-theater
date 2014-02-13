@@ -1,13 +1,13 @@
 <?php
 /*
 Plugin Name: WP Theater
-Plugin URI: http://redshiftstudio. com/wp-theater/
+Plugin URI: http://redshiftstudio.com/wp-theater/
 Description: Adds shortcodes that can display embeds, previews, user uploads, playlists, channels and groups from Youtube or Vimeo. 
 Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.1.2
+Version: 1.1.3
 */
 
 if( defined( 'ABSPATH' ) && defined( 'WPINC' ) && !class_exists( 'WP_Theater' ) ){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.1.2';
+	const VERSION = '1.1.3';
 
 	/**
 	 * Plugin directory
@@ -57,12 +57,6 @@ class WP_Theater {
 	public static $settings;
 
 	/**
-	 * Constructor
-	 * @since WP Theater 1.0.0
-	 */
-	public function WP_Theater() {__construct();}
-
-	/**
 	 * Constructs .  .  .  .    . 
 	 * @since WP Theater 1.0.0
 	 */
@@ -80,8 +74,17 @@ class WP_Theater {
 		// establish default settings
 		if ( !get_option( 'wp_theater_options' ) ) {
 
+			// Verify PHP requirement
+			if ( version_compare( phpversion(), '5.3.0', '<' ) )
+				wp_die( '<div class="error"><p><strong>WP Theater</strong> requires <strong>PHP 5.3</strong> or higher, and has been deactivated! You&aposre currently running PHP ' . phpversion() . '</p></div>' );
+
+			// Verify cURL requirement
+			if ( !function_exists( 'curl_init' ) )
+				wp_die( '<div class="error"><p><strong>WP Theater</strong> requires the PHP <strong>cURL</strong> extension, and has been deactivated!</p></div>' );
+
+			// Setup default options
 			$val = array( 
-				'version' => '1.0.0', 
+				'version' => static::VERSION, 
 				'load_css' => '1', 
 				'load_js' => '1', 
 				'load_genericons' => '1', 
@@ -92,13 +95,14 @@ class WP_Theater {
 
 		} else {
 
+			// Upgrade
 			$option = get_option( 'wp_theater_options' );
 			$option['show_activate_notice'] = '1';
+			$option['version'] = static::VERSION;
 			update_option( 'wp_theater_options', $option );
 
-			// FUTURE: Run through any new options and make sure they exist
-			// if version < V then make sure X exists ++
 		}
+
 	}
 
 	/**
@@ -159,41 +163,8 @@ class WP_Theater {
 		$option = get_option( 'wp_theater_options' );
 		if ( !current_user_can('activate_plugins') || $option['show_activate_notice'] != '1') return;
 
-		// verify php version, cURL and show activation notice
-		if (version_compare(phpversion(), '5.3.0', '<')) {
-			// deactivation will happen by WP... so no need
-			add_action( 'admin_notices', array( __CLASS__, 'admin_notice_deactivation_php' ) );
-		} elseif ( !function_exists( 'curl_init' ) ) {
-			static::deactivate();
-			add_action( 'admin_notices', array( __CLASS__, 'admin_notice_deactivation_curl' ) );
-		}else {
-			add_action( 'admin_notices', array( __CLASS__, 'admin_notice_activation' ) );
-		}
+		add_action( 'admin_notices', array( __CLASS__, 'admin_notice_activation' ) );
 
-	}
-
-	/**
-	 * Returns PHP version incompatability notice
-	 * @since WP Theater 1.1.0
-	 */
-	public static function admin_notice_deactivation_php() {		
-    ?>
-    <div class="error">
-			<p><strong>WP Theater</strong> requires <strong>PHP 5.3</strong> or higher, and has been deactivated! You're currently running PHP <?php echo phpversion(); ?></p>
-    </div>
-    <?php
-	}
-
-	/**
-	 * Returns cURL extension not installed notice
-	 * @since WP Theater 1.1.0
-	 */
-	public static function admin_notice_deactivation_curl() {
-    ?>
-    <div class="error">
-			<p><strong>WP Theater</strong> requires the PHP <strong>cURL</strong> extension, and has been deactivated!</p>
-    </div>
-    <?php
 	}
 
 	/**
@@ -247,7 +218,7 @@ class WP_Theater {
 		$options = get_option( 'wp_theater_options' );
 		$load_js = ( isset( $options['load_js'] ) ) ? $options['load_js'] : '';
 		if( (int) $load_js == 1 )
-			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script-min.js', array( 'jquery' ), '20131017', TRUE );
+			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script-min.js', array( 'jquery' ), '20140212', TRUE );
 	}
   /**/
 

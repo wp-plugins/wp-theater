@@ -1,9 +1,9 @@
 ﻿=== WP Theater ===
 Contributors: kentfarst
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU
-Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo user, youtube, vimeo, youtube api, vimeo api, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
+Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
-Tested up to: 3.8-beta-1
+Tested up to: 3.8.1
 Stable tag: 1.1.2
 License: GPLv3
 
@@ -12,11 +12,16 @@ Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed prev
 == Description ==
 WP Theater provides shortcodes for integrating **YouTube** and **Vimeo** video embeds and feeds into your posts or widgets. Some options include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, user uploads and groups.  WP Theater was built with developers in mind, those who need flexibility. With that said, great effort was put into making sure this plugin stayed simple.
 
+= Requirements =
+
+1. Tested on WordPress version 3.6 and later.  Does not support Multisite, yet.
+1. PHP 5.3 or later with cURL
+
+= Usage =
+
 For parameters and their usage please visit:
 
 http://redshiftstudio.com/wp-theater/
-
-= Usage =  *ignore/remove the extra spaces that I can't get rid of here*
 
 **Boring Embed** - The classic
 `
@@ -59,22 +64,19 @@ http://redshiftstudio.com/wp-theater/
 [vimeo group]GroupID[/vimeo]
 `
 
-
-= Requirements =
-
-1. Tested on WordPress version 3.6 and later.  Does not support Multisite, yet.
-1. PHP 5.3 or later with cURL
-
 == Frequently Asked Questions ==
 
+= How can I futher customize this plugin =
+Please check the Other Notes section for futher development information.
+
 = Can I use this plugin to show private content from my YouTube or Vimeo account? =
-No, this plugin will only show publically available content.  This feature will be part of the advanced plugin which is currently in development along side this plugin.  If you need this feature now you are looking for a plugin that requires an API key from that service.
+No, this plugin will only show publically available content.  It will skip any videos that are not publicly embeddable, even password protected videos.  These features and more will be part of the WP THEATER PRO plugin; which is currently in development.  If you need this feature now then you are looking for a plugin that requires an API key from that service.
 
 = Can I get single previews to display in the theater when clicked? =
 Not right now.  Single previews, e.g. [vimeo preview], are really only meant as a nice way to link to a video.
 
-= Can I build a listing from multiple video IDs, e.g. [youtube theater]id1,id2,id3,id4,etc[/youtube]? =
-No, we suggest using playlists or channels for this task.  Benifits of both are the ability to add another user's video as well as reordering them directly from YouTube or Vimeo.
+= Can I build a listing from multiple video IDs, e.g. [youtube theater]id1,id2,id3[/youtube]? =
+Not for now, we suggest using playlists or channels for this task.  Benifits of both are the ability to add another user's video as well as adding and reordering them directly from YouTube or Vimeo.
 
 = What settings can be changed? =
 Outside of the shortcode's parameters there are settings for you to disable the loaded assets as well setting cache expirations.
@@ -83,12 +85,6 @@ Outside of the shortcode's parameters there are settings for you to disable the 
 * *Use Default Genericons* - You can choose to disable the Genericons fallback CSS file.  You should only disable the Genericons if you've also disabled the CSS file as the characters/icons are currently hardcoded.  WP Theater's genericons will not load if genericons are already enqueued.
 * *Use Default JS* - You can choose to disable the built in JS file so that you can write your own.
 * *Cache Expiration* - Feeds are cached using the Transient API and this setting will set the expiration.  A value of 0 (zero) will bypass caching.
-
-= My shortcode looks correct but does not seem to be loading or I notice that it is not making use of the transient cache =
-Try changing the Transitent Expiration setting to 0.  Please inform me through the support forums if this solves the issue along with the shortcode usage.  Some issues exist with caching data when certain special characters are used in a video's description (hearts, etc.).  If you are the owner of video's with these characters I would suggest that you remove those characters until the issue is sorted out.
-
-= How can I futher customize this plugin =
-Please check the Other Notes section for futher development information.
 
 
 
@@ -110,9 +106,9 @@ Attributes
 
 API Feeds -- Override built in api request and parsing.  NOTE: Keep in mind that these filters will only be called when the transient cache is updated.
 
-* "wp_theater-pre_get_api_data" ( '', $atts )
 * "wp_theater-pre_get_request_url" ( '', $atts, $request, $output )
-* "wp_theater-pre_parse_feed" ( '', $response, $atts )
+* "wp_theater-pre_get_api_data" ( '', $atts, $request_url )
+* "wp_theater-parse_{$service}_response" ( $out, $response, $atts) // v1.1.3
 
 Content
 
@@ -151,8 +147,11 @@ array(
 	'preset' => '',
 	'service' => 'youtube',
 	'mode' => 'embed',
-	'id' => '',
+	'embed_width' => FALSE,
+	'embed_height' => FALSE,
+	'id' => '', // video id not element id -- may change in the future to clarify
 	'class'=> '',
+	'cache'=> true,
 
 	// preview & listing options
 	'img_size' => 'small',
@@ -178,7 +177,7 @@ array(
 	'keep_ratio' => TRUE,
 
 	// can only be defined in presets
-	'modes' => array(), // can only be defined in presets
+	'modes' => array(),
 	'classes' => array(
 		'section' => '',
 		'theater' => '',
@@ -236,7 +235,6 @@ object
 `
 
 
-
 == Screenshots ==
 
 1. Sample screen shot of how a Vimeo group would look.  Image shows the title, theater, lower-lights & full window buttons, videos listing with thumb & title and a link to more content.
@@ -244,6 +242,21 @@ object
 
 == Changelog ==
 
+= 1.1.3 (2/12/2014) =
+
+* Fixed PHP 5.4 compatibility
+* Fixed PHP and cURL activation check.
+* Fixed shortcode_atts call to include the tag name.
+* Fixed autoscroll for themes that apply a *masthead-fixed* class (cough twentyfourteen cough) and when the adminbar is there.
+* Fixed embeds so they make use of *$content_width*, are generated around that ratio, and don't rely on a iframe{width:100%} style.
+* Added back in embed_width and embed_height parameters -- these will take priority but the plugin will handle fine without them.
+* Enabled transient cache + final fix for transient names exceeding max characters for multisite and non-multisite WP installs
+* Added option for disabling transient cache per shortcode usage with *cache* and *dont_cache* parameters.
+* Removed 'wp_theater-pre_parse_feed' filter
+* Added 'wp_theater-parse_{$service}_response' filter -- all internal parsing is now done through this filter. (extensible sources pt. 1)
+* Updated 'wp_theater-pre_get_api_data' filter to be applied after the *get_request_url* and added the *$request_url* as a parameter to *get_request_url*
+* Removed most instances of static text to reduce the need for front-end translations. (translations pt. 1)
+* FUTURE DEV WARNING : 1.1.4 will add *modes* placeholders for Vimeo's API %request%.%output% and *classes* placeholders for %service%, %mode%, %preset%.
 
 = 1.1.2 (12/11/2013) =
 
@@ -314,10 +327,3 @@ object
 = 1.0 (09/13/2013) =
 
 * Initial Release
-
-
-
-== Upgrade Notice ==
-
-= 1.1.1 =
-Fixes for cache expiration
