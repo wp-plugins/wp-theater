@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.1.3
+Version: 1.1.4
 */
 
 if( defined( 'ABSPATH' ) && defined( 'WPINC' ) && !class_exists( 'WP_Theater' ) ){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.1.3';
+	const VERSION = '1.1.4';
 
 	/**
 	 * Plugin directory
@@ -71,19 +71,23 @@ class WP_Theater {
 	 */
 	public static function activation() {
 
+		// Verify PHP requirement
+		if ( version_compare( phpversion(), '5.3.0', '<' ) ) {
+			echo "<strong>WP Theater</strong> requires <strong>PHP 5.3.0</strong> or higher, and has been deactivated! You're currently running <strong>PHP " . phpversion() . "</strong>." ;
+			exit;
+		}
+
+		// Verify cURL requirement
+		if ( !function_exists( 'curl_init' ) ) {
+			echo "<strong>WP Theater</strong> requires the PHP <strong>cURL</strong> extension, and has been deactivated!" ;
+			exit;
+		}
+
 		// establish default settings
 		if ( !get_option( 'wp_theater_options' ) ) {
 
-			// Verify PHP requirement
-			if ( version_compare( phpversion(), '5.3.0', '<' ) )
-				wp_die( '<div class="error"><p><strong>WP Theater</strong> requires <strong>PHP 5.3</strong> or higher, and has been deactivated! You&aposre currently running PHP ' . phpversion() . '</p></div>' );
-
-			// Verify cURL requirement
-			if ( !function_exists( 'curl_init' ) )
-				wp_die( '<div class="error"><p><strong>WP Theater</strong> requires the PHP <strong>cURL</strong> extension, and has been deactivated!</p></div>' );
-
 			// Setup default options
-			$val = array( 
+			$option = array( 
 				'version' => static::VERSION, 
 				'load_css' => '1', 
 				'load_js' => '1', 
@@ -91,7 +95,7 @@ class WP_Theater {
 				'cache_life' => 14400, 
 				'show_activate_notice' => '1'
 			 );
-			add_option( 'wp_theater_options', $val );
+			add_option( 'wp_theater_options', $option );
 
 		} else {
 
@@ -161,7 +165,7 @@ class WP_Theater {
 	 */
 	public static function activate_check() {
 		$option = get_option( 'wp_theater_options' );
-		if ( !current_user_can('activate_plugins') || $option['show_activate_notice'] != '1') return;
+		if ( !current_user_can('activate_plugins') || (isset($option['show_activate_notice']) && $option['show_activate_notice'] != '1')) return;
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notice_activation' ) );
 
@@ -224,11 +228,11 @@ class WP_Theater {
 
 } /* END CLASS*/
 
-} /* END EXISTS CHECK */
-
 // define the plugin's location variables
 WP_Theater::$dir = trailingslashit( plugin_dir_path( __FILE__ ) );
 WP_Theater::$uri = trailingslashit( plugin_dir_url( __FILE__ ) );
 WP_Theater::$inc = WP_Theater::$dir  .  trailingslashit( 'inc' );
 // start it up
 WP_Theater::init();
+
+} /* END EXISTS CHECK */

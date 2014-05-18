@@ -54,7 +54,7 @@ class WP_Theater_Settings {
 	/* settings link in plugin management screen */
 	public function plugin_action_links($actions, $file) {
 		if(false !== strpos($file, 'wp_theater'))
-			$actions['settings'] = '<a href="options-general.php?page=wp_theater">Settings</a>';
+			$actions['settings'] = '<a href="options-general.php?page=wp_theater">' . esc_html__('Settings', 'wptheater') . '</a>';
 
 		return $actions; 
 	}
@@ -70,14 +70,14 @@ class WP_Theater_Settings {
 
 		add_settings_section(
 			'wpts_genset',
-			'General Settings', 
+			esc_html__('General Settings', 'wptheater'),
 			array( $this, 'wpts_genset_desc' ),
 			'wp_theater'
 		);
 
 		add_settings_field(
 			'wpts_genset_load_css',
-			'Load Default CSS?', 
+			esc_html__('Load Default CSS?', 'wptheater'),
 			array( $this, 'default_css_fields' ),
 			'wp_theater',
 			'wpts_genset'
@@ -85,7 +85,7 @@ class WP_Theater_Settings {
 
 		add_settings_field(
 			'wpts_genset_load_gi',
-			'Load Genericons?<br/><em>if not already loaded</em>', 
+			esc_html__('Load Genericons?', 'wptheater') . '<br/><em>' . esc_html__('if not already loaded', 'wptheater') . '</em>',
 			array( $this, 'default_genericons_fields' ),
 			'wp_theater',
 			'wpts_genset'
@@ -93,7 +93,7 @@ class WP_Theater_Settings {
 
 		add_settings_field(
 			'wpts_genset_load_js',
-			'Load Default Javascript?', 
+			esc_html__('Load Default Javascript?', 'wptheater'),
 			array( $this, 'default_js_fields' ),
 			'wp_theater',
 			'wpts_genset'
@@ -101,7 +101,7 @@ class WP_Theater_Settings {
 
 		add_settings_field(
 			'wpts_genset_cache_life',
-			'Cache Expiration?<br/><em>in seconds</em>', 
+			esc_html__('Cache Expiration?', 'wptheater') . '<br/><em>' . esc_html__('in seconds.  0 (zero) to bypass.', 'wptheater') . '</em>',
 			array( $this, 'default_cache_fields' ),
 			'wp_theater',
 			'wpts_genset'

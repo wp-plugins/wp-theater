@@ -1,9 +1,9 @@
 ﻿=== WP Theater ===
 Contributors: kentfarst
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU
-Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
+Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo album, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
-Tested up to: 3.8.1
+Tested up to: 3.9.1
 Stable tag: 1.1.3
 License: GPLv3
 
@@ -59,10 +59,18 @@ http://redshiftstudio.com/wp-theater/
 [youtube playlist]PlaylistID[/youtube]
 `
 
+**Album** - Listing of videos from a specific album
+`
+[vimeo album]AlbumID[/vimeo]
+`
+
 **Group** - Listing of videos from a specific group
 `
 [vimeo group]GroupID[/vimeo]
 `
+
+**NOTICE -- YouTube has depreciated the api (v2) used by this plugin.  They will shut down that API version in April 2015.  There will be an update before then but it will require a simple API key for continued use.**
+
 
 == Frequently Asked Questions ==
 
@@ -78,14 +86,16 @@ Not right now.  Single previews, e.g. [vimeo preview], are really only meant as 
 = Can I build a listing from multiple video IDs, e.g. [youtube theater]id1,id2,id3[/youtube]? =
 Not for now, we suggest using playlists or channels for this task.  Benifits of both are the ability to add another user's video as well as adding and reordering them directly from YouTube or Vimeo.
 
+= The autoscrolling is going behind my fixed header.  How can I fix this =
+This is a stretch of this plugins scope but there is a possible fix.  We followed TwentyFourteens method of the body needing to have a "masthead-fixed" class and the main header must have an id of "masthead".  That's the best we can do.
+
 = What settings can be changed? =
 Outside of the shortcode's parameters there are settings for you to disable the loaded assets as well setting cache expirations.
 
 * *Use Default CSS* - You can choose to disable the built in CSS file so that you can write your own.
 * *Use Default Genericons* - You can choose to disable the Genericons fallback CSS file.  You should only disable the Genericons if you've also disabled the CSS file as the characters/icons are currently hardcoded.  WP Theater's genericons will not load if genericons are already enqueued.
 * *Use Default JS* - You can choose to disable the built in JS file so that you can write your own.
-* *Cache Expiration* - Feeds are cached using the Transient API and this setting will set the expiration.  A value of 0 (zero) will bypass caching.
-
+* *Cache Expiration* - Feeds are cached using the Transient API and this will set the expiration.  A value of 0 (zero) will bypass ALL caching.
 
 
 == Developer FAQ ==
@@ -95,9 +105,9 @@ Filters exist that can handle complete customization of the output.  Written as 
 
 Display -- Override built in output
 
-* "wp_theater-pre_video_shortcode" ( '', $feed, $atts )
-* "wp_theater-pre_theater" ( '', $atts, $content, $tag )
-* "wp_theater-pre_video_preview" ( '', $video, $atts, $selected )
+* "wp_theater-pre_video_shortcode" ( FALSE, $feed, $atts )
+* "wp_theater-pre_theater" ( FALSE, $atts, $content, $tag )
+* "wp_theater-pre_video_preview" ( FALSE, $video, $atts, $selected )
 
 Attributes
 
@@ -106,16 +116,14 @@ Attributes
 
 API Feeds -- Override built in api request and parsing.  NOTE: Keep in mind that these filters will only be called when the transient cache is updated.
 
-* "wp_theater-pre_get_request_url" ( '', $atts, $request, $output )
-* "wp_theater-pre_get_api_data" ( '', $atts, $request_url )
+* "wp_theater-pre_get_request_url" ( FALSE, $atts, $request, $output )
 * "wp_theater-parse_{$service}_response" ( $out, $response, $atts) // v1.1.3
 
 Content
 
 * "wp_theater-section_title" ( $title )
 * "wp_theater-video_title" ( $title )
-* "wp_theater-pre_get_more_link" ( '', $atts, $first_id )
-* "wp_theater-get_more_link" ( $more_link, $atts, $first_id )
+* "wp_theater-{$service}_more_url" ( FALSE, $atts, $first_id )
 
 Presets
 
@@ -134,7 +142,7 @@ function my_preset_init ($presets) {
 	) ) );
 	add_shortcode( 'my_preset', array( WP_Theater::$shortcodes, 'video_shortcode' ) );
 }
-add_action('wp_theater-add_shortcodes', 'my_preset_init');
+add_action('wp_theater-shortcodes_init', 'my_preset_init');
 `
 
 
@@ -145,17 +153,17 @@ Listed below are all of the possible settings you can define in a preset with th
 array(
 	// general options
 	'preset' => '',
-	'service' => 'youtube',
+	'service' => '',
 	'mode' => 'embed',
+	'id' => '',
 	'embed_width' => FALSE,
 	'embed_height' => FALSE,
-	'id' => '', // video id not element id -- may change in the future to clarify
-	'class'=> '',
-	'cache'=> true,
+	'class' => '',
+	'cache' => TRUE,
 
 	// preview & listing options
-	'img_size' => 'small',
-	'columns' => 6,
+	'img_size' => 'medium',
+	'columns' => 3,
 	'max' => 12,
 	'autoplay_onclick' => TRUE,
 
@@ -177,13 +185,13 @@ array(
 	'keep_ratio' => TRUE,
 
 	// can only be defined in presets
-	'modes' => array(),
-	'classes' => array(
-		'section' => '',
-		'theater' => '',
-		'embed' => '',
-		'list' => '',
-		'preview' => ''
+	'modes' => array(), // the modes array with matching link formats
+	'classes' => array( // the classes to apply to their respective elements
+		'section' => 'entry-section wp-theater-section %service% %mode% %preset%',
+		'theater' => 'wp-theater-bigscreen',
+		'embed' => 'wp-theater-iframe',
+		'list' => 'wp-theater-listing',
+		'preview' => 'video-preview'
 	)
 );
 `
@@ -199,7 +207,7 @@ function my_preset_init ($presets) {
 	$youtube_preset['modes']['embed'] = 'https://www.youtube-nocookie.com/embed/%id%?wmode=transparent&autohide=1';
 	$presets->set_preset( 'youtube', $youtube_preset );
 }
-add_action('wp_theater-add_shortcodes', 'my_preset_init');
+add_action('wp_theater-shortcodes_init', 'my_preset_init');
 `
 NOTE:  Each mode URL must have %id% in the place of the id.  And, it's a bit dumb but, for now you must include at least one query parameter in an embed's url.
 
@@ -242,6 +250,30 @@ object
 
 == Changelog ==
 
+= 1.1.4 (4/15/2014) =
+
+* Added support for Vimeo Albums.
+* Added/fixed medium sized YouTube thumbnails.
+* Added classes ability to contain placeholders for %service%, %mode% and %preset%.  NOTE: These are no longer included by default to reduce the default html to text ratio.
+* Added *wp_theater-{$service}_more_url* filter -- all internal handling of more link urls are done through this filter (extensible services pt. 2a)
+* Fixed PHP and cURL activation check... no, really, it's fixed.  If not, I'm snapping a(nother) keyboard.
+* Fixed error when YouTube ratings and likes are blocked for a video.
+* Fixed *cache* shorthand parameter and updated default to not cache.
+* Fixed previews from remaining selected or being selected initially when no theater(embed) is preset or when using theater_id.
+* Updated solo previews so they display inside a figure element with a figcaption wrapped title.
+* Updated *theater_id* to cause listings to hide their theater.
+* Updated more_link to not carry a nofollow rel value.
+* Updated capture_no_value_atts to accept all regestered modes and services. (extensible services pt. 2b)
+* Updated autoscrolling to also look for the first *.site-header* if *#masthead* doesn't exist (when the body tag has a *masthead-fixed* class.
+* Removed *wp_theater-pre_get_api_data* filter for the time being -- useless and a security threat.
+* Removed *wp_theater-capture_no_value_atts* filter for being useless
+* Removed *wp_theater-pre_get_more_link* filter for being useless
+* Updated transients to reset when the plugin is updated by adding a *plugin_version* variable to the API data.
+* Misc cleanup and speedup.
+
+{not yet)
+* Updated preview only have one link which contains both the image and title and moved data-* attributes to that link.  This is so lightbox players can be more easliy integrated and to reduce the html to text ratio.
+
 = 1.1.3 (2/12/2014) =
 
 * Fixed PHP 5.4 compatibility
@@ -253,10 +285,9 @@ object
 * Enabled transient cache + final fix for transient names exceeding max characters for multisite and non-multisite WP installs
 * Added option for disabling transient cache per shortcode usage with *cache* and *dont_cache* parameters.
 * Removed 'wp_theater-pre_parse_feed' filter
-* Added 'wp_theater-parse_{$service}_response' filter -- all internal parsing is now done through this filter. (extensible sources pt. 1)
+* Added 'wp_theater-parse_{$service}_response' filter -- all internal parsing is now done through this filter. (extensible services pt. 1)
 * Updated 'wp_theater-pre_get_api_data' filter to be applied after the *get_request_url* and added the *$request_url* as a parameter to *get_request_url*
 * Removed most instances of static text to reduce the need for front-end translations. (translations pt. 1)
-* FUTURE DEV WARNING : 1.1.4 will add *modes* placeholders for Vimeo's API %request%.%output% and *classes* placeholders for %service%, %mode%, %preset%.
 
 = 1.1.2 (12/11/2013) =
 
@@ -264,10 +295,6 @@ object
 * Fixed transient cache to bypass cached data when that data is malformed. Usually caused by special characters in a video's description -- hearts etc.)
 * Fixed shorthand paramaters *dont_keep_ratio* and *dont_autoplay_onclick* to work as expected.
 * Fixed shorthand columns parameters -- 1cols, 2cols 3cols, etc.
-
-= 1.1.1 (11/18/2013) =
-
-* Fumbled update with a side of facepalm.
 
 = 1.1.0 (10/17/2013) =
 
@@ -323,6 +350,7 @@ object
 = 1.0.2 (09/13/2013) =
 
 * Stupid typos
+
 
 = 1.0 (09/13/2013) =
 

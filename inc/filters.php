@@ -1,5 +1,7 @@
 <?php
 
+/*  This whole file really isn't needed but I left it in anyway... */
+
 /*
  * Filters for strings of text
  */
@@ -7,6 +9,7 @@ foreach (
 	array( 
 		'wp_theater-section_title',
 		'wp_theater-text',
+		'wp_theater-more_text',
 		'wp_theater-title',
 		'wp_theater-video_title'
 	) as $filter ) {
@@ -32,13 +35,13 @@ foreach (
 
 	if ( is_admin() )
 		add_filter( $filter, 'wp_strip_all_tags' );
-	add_filter( $filter, 'esc_url'           );
+	add_filter( $filter,   'esc_url'           );
 	if ( is_admin() )
-		add_filter( $filter, 'wp_kses_data'    );
+		add_filter( $filter, 'wp_kses_data'      );
 }
 
 /*
- * before save filters
+ * before save filters -- Just kept for future
  */
 if (is_admin()) {
 

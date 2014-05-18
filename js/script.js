@@ -6,12 +6,12 @@
 
 	$(document).ready(function() {
 
-		if($('.wp-theater-section').length !== 0) {
+		if($('.wp-theater-section').length) {
 			wp_theater_init();
 		}
 
 		// check if the theater is in use
-		if($('.wp-theater-bigscreen').length !== 0) {
+		if($('.wp-theater-bigscreen').length) {
 			wp_theater_bigscreen_init();
 		}
 
@@ -22,48 +22,51 @@
 
 			var section = this,
 					$section = $(this),
-					service, $iframe, $bigscreen,
+					$iframe, $bigscreen,
 					$videos = $('.video-preview', this);
+					external_theater = false;
 
-			if($('.video-preview').length === 0)
+			if(!$('.video-preview').length)
 				return;
 
-			// would be ideal to setup a redirect to
-			// capture a request for all service types.  Until then...
-			if($section.hasClass('youtube'))
-				service = 'youtube';
-			else if($section.hasClass('vimeo'))
-				service = 'vimeo';
-
 			// if the theater does not exist look for the data-theater-id
-			if($('.wp-theater-iframe', this).length !== 0){
+			if($('.wp-theater-iframe', this).length){
 				$bigscreen = $('.wp-theater-bigscreen', this);
 				$iframe = $('.wp-theater-iframe', this);
-			}else if($section.is('[data-theater-id]') && $('#'+$section.attr('data-theater-id')).length !== 0){
+			}else if($section.is('[data-theater-id]') && $('#'+$section.attr('data-theater-id')).length){
 				$bigscreen = $('#'+$section.attr('data-theater-id'));
 				$iframe = $('#'+$section.attr('data-theater-id') + ' .wp-theater-iframe');
+				external_theater = true;
 			}else {
 				return;
 			}
 
-			$videos.children('a').click(function(e) { e.preventDefault(); });
+			$videos.find('a').click(function(e) { e.preventDefault(); });
 
 			$videos.click(function(e) {
-				$('.video-preview.selected', section).removeClass('selected');
-				$(this).addClass('selected');
-				$iframe.attr('src', $(this).attr('data-embed-url'));
-				$iframe.attr('width', parseInt($(this).attr('data-embed-width')));
-				$iframe.attr('height', parseInt($(this).attr('data-embed-height')));
+				$video = $(this);
+				if (external_theater){
+					$('.wp-theater-section[data-theater-id="' + $section.attr('data-theater-id') +'"]').find('.video-preview.selected').removeClass('selected');
+				}else{
+					$section.find('.video-preview.selected').removeClass('selected');
+				}
+				$video.addClass('selected');
+				$iframe.attr('src', $video.attr('data-embed-url'));
+				$iframe.attr('width', parseInt($video.attr('data-embed-width')));
+				$iframe.attr('height', parseInt($video.attr('data-embed-height')));
 				$iframe.trigger('changed');
-				if(!elementIsInView($bigscreen)) {
+				if(!wp_theater_elementIsInView($bigscreen)) {
 					var h = $bigscreen.offset().top;
 					if ($body.hasClass('masthead-fixed')) {
-						h -= parseInt($('#masthead').height());
+						if ($('#masthead').length)
+							h -= parseInt($('#masthead').height());
+						else if ($('.site-header').length)
+							h -= parseInt($('.site-header:first-child').height());
 					}
 					if ($('#wpadminbar').length) {
 						h -= parseInt($('#wpadminbar').height());
 					}
-						
+
 					// get height of masthead and add it to our 25px
 					$('html, body').animate({
 						scrollTop:Math.round(h-15)+'px'
@@ -78,14 +81,14 @@
 
 			var bigscreen = this,
 					$bigscreen = $(this),
-					$bigscreenInner = $('.wp-theater-bigscreen-inner', this),
-					$bigscreenOptions = $('.wp-theater-bigscreen-options', this),
-					$toggle_fullwindow = $('a.fullwindow-toggle', this),
-					$toggle_lights = $('a.lowerlights-toggle', this),
+					$bigscreenInner = $bigscreen.find('.wp-theater-bigscreen-inner'),
+					$bigscreenOptions = $bigscreen.find('.wp-theater-bigscreen-options'),
+					$toggle_fullwindow = $bigscreen.find('a.fullwindow-toggle'),
+					$toggle_lights = $bigscreen.find('a.lowerlights-toggle'),
 					$iframe,
 					fullWindowTimeout = false;
 
-			if ($('.wp-theater-iframe', this).length !== 0)
+			if ($('.wp-theater-iframe', this).length)
 				$iframe = $('.wp-theater-iframe', this);
 			else return;
 
@@ -93,7 +96,7 @@
 			wp_theater_iframeHeightAuto($iframe);
 
 			// check if there is a full window toggle button
-			if($toggle_fullwindow.length !== 0) {
+			if($toggle_fullwindow.length) {
 				$toggle_fullwindow.click(function(e) {
 					if(!$bigscreen.hasClass('fullwindow')){
 						//has to be first
@@ -129,8 +132,8 @@
 				}
 			});
 
-			// check if there is a full window toggle button
-			if($toggle_lights.length !== 0) {
+			// check if there is a full lower lights toggle button
+			if($toggle_lights.length) {
 				$toggle_lights.click(function(e) {
 
 					if($bigscreen.hasClass('lowerlights')){
@@ -140,10 +143,10 @@
 						});
 					}else{
 						$bigscreen.addClass('lowerlights');
-						// NEEDS: Only add this once and reuse, IE8 bug.
-						if ($('#wp-theater-lowerlights').length == 0)
+						// make sure the overlay is only added once.
+						if ($('#wp-theater-lowerlights').length)
 							$body.prepend('<div id="wp-theater-lowerlights">&nbsp;</div>')
-						$('#wp-theater-lowerlights').hide().fadeIn(1000);
+						$('#wp-theater-lowerlights').hide(0).fadeIn(1000);
 					}
 
 					e.preventDefault();
@@ -224,7 +227,7 @@
 		$body.css({"margin-right":0,"margin-bottom":0});
 	}
 
-	function elementIsInView($elem) {
+	function wp_theater_elementIsInView($elem) {
     var docViewTop = $window.scrollTop();
     var docViewBottom = docViewTop + $window.height();
 
