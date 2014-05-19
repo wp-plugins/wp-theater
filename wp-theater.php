@@ -206,7 +206,7 @@ class WP_Theater {
 		$load_css = ( isset( $options['load_css'] ) ) ? $options['load_css'] : '';
 
 		if( (int) $load_css == 1 )
-			wp_enqueue_style( 'wp_theater-styles', static::$uri . 'css/style-min.css', array(), '20131017' );
+			wp_enqueue_style( 'wp_theater-styles', static::$uri . 'css/style-min.css', array(), '20140518' );
 
 		// Add Genericons font, used in the main stylesheet IF it's not queued up already
 		$load_gi = ( isset( $options['load_genericons'] ) ) ? $options['load_genericons'] : '';
@@ -222,7 +222,7 @@ class WP_Theater {
 		$options = get_option( 'wp_theater_options' );
 		$load_js = ( isset( $options['load_js'] ) ) ? $options['load_js'] : '';
 		if( (int) $load_js == 1 )
-			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script-min.js', array( 'jquery' ), '20140212', TRUE );
+			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script-min.js', array( 'jquery' ), '20140518', TRUE );
 	}
   /**/
 
