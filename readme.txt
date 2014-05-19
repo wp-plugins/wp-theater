@@ -84,10 +84,10 @@ No, this plugin will only show publically available content.  It will skip any v
 Not right now.  Single previews, e.g. [vimeo preview], are really only meant as a nice way to link to a video.
 
 = Can I build a listing from multiple video IDs, e.g. [youtube theater]id1,id2,id3[/youtube]? =
-Not for now, we suggest using playlists or channels for this task.  Benifits of both are the ability to add another user's video as well as adding and reordering them directly from YouTube or Vimeo.
+Not for now, we suggest using playlists, albums or channels for this task.  Benifits of both are the ability to add another user's video as well as adding and reordering them directly from YouTube or Vimeo.
 
 = The autoscrolling is going behind my fixed header.  How can I fix this =
-This is a stretch of this plugins scope but there is a possible fix.  We followed TwentyFourteens method of the body needing to have a "masthead-fixed" class and the main header must have an id of "masthead".  That's the best we can do.
+This is a stretch of this plugins scope but there is a possible fix.  We followed TwentyFourteens method of the body element having a "masthead-fixed" class and the main header must have either an id of "masthead" or class of *site-header*.
 
 = What settings can be changed? =
 Outside of the shortcode's parameters there are settings for you to disable the loaded assets as well setting cache expirations.
@@ -111,7 +111,6 @@ Display -- Override built in output
 
 Attributes
 
-* "wp_theater-capture_no_value_atts" ( $atts )
 * "wp_theater-format_params" ( $atts, $content, $tag )
 
 API Feeds -- Override built in api request and parsing.  NOTE: Keep in mind that these filters will only be called when the transient cache is updated.
@@ -123,7 +122,7 @@ Content
 
 * "wp_theater-section_title" ( $title )
 * "wp_theater-video_title" ( $title )
-* "wp_theater-{$service}_more_url" ( FALSE, $atts, $first_id )
+* "wp_theater-{$service}_more_url" ( FALSE, $atts, $data ) // v1.1.4
 
 Presets
 
@@ -159,7 +158,7 @@ array(
 	'embed_width' => FALSE,
 	'embed_height' => FALSE,
 	'class' => '',
-	'cache' => TRUE,
+	'cache' => FALSE,
 
 	// preview & listing options
 	'img_size' => 'medium',
@@ -250,36 +249,33 @@ object
 
 == Changelog ==
 
-= 1.1.4 (4/15/2014) =
+= 1.1.4 (5/18/2014) =
 
 * Added support for Vimeo Albums.
 * Added/fixed medium sized YouTube thumbnails.
-* Added classes ability to contain placeholders for %service%, %mode% and %preset%.  NOTE: These are no longer included by default to reduce the default html to text ratio.
-* Added *wp_theater-{$service}_more_url* filter -- all internal handling of more link urls are done through this filter (extensible services pt. 2a)
-* Fixed PHP and cURL activation check... no, really, it's fixed.  If not, I'm snapping a(nother) keyboard.
-* Fixed error when YouTube ratings and likes are blocked for a video.
+* Added classes preset variable to contain all classes used and accept placeholders for %service%, %mode% and %preset%.  NOTE: Service, mode and preset classes are no longer added by default to reduce the default html to text ratio.
+* Added *wp_theater-{$service}_more_url* filter.  All internal handling of more link urls are done through this filter (extensible services pt. 2a)
+* Fixed PHP and cURL activation check... If not, I'm snapping a(nother) keyboard.
+* Fixed error when YouTube ratings and likes data are blocked for a video.
 * Fixed *cache* shorthand parameter and updated default to not cache.
 * Fixed previews from remaining selected or being selected initially when no theater(embed) is preset or when using theater_id.
 * Updated solo previews so they display inside a figure element with a figcaption wrapped title.
 * Updated *theater_id* to cause listings to hide their theater.
 * Updated more_link to not carry a nofollow rel value.
 * Updated capture_no_value_atts to accept all regestered modes and services. (extensible services pt. 2b)
-* Updated autoscrolling to also look for the first *.site-header* if *#masthead* doesn't exist (when the body tag has a *masthead-fixed* class.
+* Updated autoscrolling to also check for the first *.site-header* if *#masthead* doesn't exist.
 * Removed *wp_theater-pre_get_api_data* filter for the time being -- useless and a security threat.
 * Removed *wp_theater-capture_no_value_atts* filter for being useless
 * Removed *wp_theater-pre_get_more_link* filter for being useless
 * Updated transients to reset when the plugin is updated by adding a *plugin_version* variable to the API data.
 * Misc cleanup and speedup.
 
-{not yet)
-* Updated preview only have one link which contains both the image and title and moved data-* attributes to that link.  This is so lightbox players can be more easliy integrated and to reduce the html to text ratio.
-
 = 1.1.3 (2/12/2014) =
 
 * Fixed PHP 5.4 compatibility
 * Fixed PHP and cURL activation check.
 * Fixed shortcode_atts call to include the tag name.
-* Fixed autoscroll for themes that apply a *masthead-fixed* class (cough twentyfourteen cough) and when the adminbar is there.
+* Fixed autoscroll for themes that apply a *masthead-fixed* class and when the adminbar is there.
 * Fixed embeds so they make use of *$content_width*, are generated around that ratio, and don't rely on a iframe{width:100%} style.
 * Added back in embed_width and embed_height parameters -- these will take priority but the plugin will handle fine without them.
 * Enabled transient cache + final fix for transient names exceeding max characters for multisite and non-multisite WP installs
@@ -317,7 +313,6 @@ object
 * Fixed *class* parameter so it is not applied to multiple elements, just the leading parent element for a given mode.
 * Added the preset name as a class for the section, theater and preview.
 * Added *classes* array parameter for presets to define default classes for the different areas -- section, theater, embed, list and	preview, when used.
-* Updated JS to make it less likely to conflict with other plugins.
 
 = 1.0.8 (09/17/2013) =
 
@@ -325,7 +320,7 @@ object
 * Fixed instance where embeds would get query params added which are only meant for API requests
 * Fixed WP Theater's version of shortcode_atts, which removes the filter hook, to only be used when setting up presets
 * Removed plugin related constants in favor of class variables
-* More readme fixes with screenshot
+* Added screenshot
 
 = 1.0.7 (09/16/2013) =
 
@@ -337,20 +332,10 @@ object
 * Removed the useless [video] shortcode as it conflicts with WP's built in shortcode by the same name
 * Removed admin files from being included when on the front-end and vice versa
 * Removed style coloring on links so a theme's styles take priority
-* More readme fixes
-
-= 1.0.6 (09/15/2013) =
-
-* Removed timing code left in by mistake
 
 = 1.0.5 (09/14/2013) =
 
 * Enabled setting for transient cache expiration (default is 4 hrs. -- 14400 seconds)
-
-= 1.0.2 (09/13/2013) =
-
-* Stupid typos
-
 
 = 1.0 (09/13/2013) =
 

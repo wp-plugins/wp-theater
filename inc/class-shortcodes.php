@@ -607,7 +607,8 @@ class WP_Theater_Shortcodes  {
 		$response = curl_exec($ch);
 
 		// make sure that curl executed as expect
-		if (curl_errno($ch) !== CURLE_OK) return FALSE; // TODO: Return WP_Error
+		if (curl_errno($ch) !== CURLE_OK)
+			return FALSE; // TODO: Return WP_Error
 
 		curl_close($ch);
 
@@ -635,7 +636,7 @@ class WP_Theater_Shortcodes  {
 	 */
 	protected function get_request_url($atts, $request = 'videos', $output = 'json')  {
 
-		// allow a filter hook here in case someone wants to replace this content.
+		// allow a filter hook here in case someone wants to replace replace the request url.
 		if ( $out = apply_filters( 'wp_theater-pre_get_request_url', FALSE, $atts, $request, $output) )
 			return $out;
 
@@ -685,8 +686,7 @@ class WP_Theater_Shortcodes  {
 		}
 
 		$out->title = $atts['mode'] == 'user' ? (string) __('Uploads by', 'wptheater') . ' ' . $atts['id'] : (string) $feed->data->title;
-		// oddly enough this works even though the video id is not the author of the playlist.... 
-		$out->url = apply_filters('wp_theater-youtube_more_url', FALSE, $atts, isset($out->videos[0]) ? $out->videos[0]->id : FALSE);
+		$out->url = apply_filters('wp_theater-youtube_more_url', FALSE, $atts, $out);
 
 		return $out;
 	}
@@ -721,7 +721,6 @@ class WP_Theater_Shortcodes  {
 		$out->description = (string) $video->description;
 		$out->category = (string) $video->category;
 		$out->duration = (string) $video->duration;
-		
 
 		if (isset ($video->accessControl->rate) && $video->accessControl->rate == 'denied') {
 			$out->rating = '';
@@ -730,6 +729,7 @@ class WP_Theater_Shortcodes  {
 			$out->rating = (string) $video->rating;
 			$out->likeCount = (string) $video->likeCount;
 		}
+
 		$out->viewCount = (string) $video->viewCount;
 
 		// dimensions -- not going to bother with their aspect-ratio BS.
@@ -742,7 +742,6 @@ class WP_Theater_Shortcodes  {
 		$out->thumbnails['medium'] = str_replace('hqdefault', 'mqdefault', $video->thumbnail->hqDefault);
 		$out->thumbnails['large'] = (string) $video->thumbnail->hqDefault;
 
-
 		return $out;
 	}
 
@@ -751,11 +750,11 @@ class WP_Theater_Shortcodes  {
 	 * @since WP Theater 1.0.0
 	 *
 	 * @param array $atts The shortcode attributes
-	 * @param array $first_id The id of the first video
+	 * @param array $data The formatted api data
 	 *
 	 * @return string The resulting url
 	 */
-	public function get_youtube_more_url($atts, $first_id = FALSE) {
+	public function get_youtube_more_url($atts, $data = FALSE) {
 
 		$out = $atts['modes']['link'];
 		if($atts['mode'] == 'user')
@@ -764,8 +763,10 @@ class WP_Theater_Shortcodes  {
 			$out .= 'watch?';
 			if($atts['mode'] == 'embed' || $atts['mode'] == 'preview')
 				$out .= 'v=' . $atts['id'];
-			elseif($atts['mode'] == 'playlist')
-				$out .= 'v=' . $first_id . '&list=' . $atts['id'];
+			elseif($atts['mode'] == 'playlist' && $data !== FALSE && isset ($data->videos[0])) {
+				$first_vid = $data->videos[0];
+				$out .= 'v=' . $first_vid->id . '&list=' . $atts['id'];
+			}
 
 		return $out;
 	}
@@ -794,7 +795,7 @@ class WP_Theater_Shortcodes  {
 		foreach($feed as $video) {
 
 			// make sure we can embed the video -- not doing the passworded, restricted sites etc. -> beyond scope
-			if ($video->embed_privacy  != 'anywhere')
+			if ($video->embed_privacy != 'anywhere')
 				continue;
 
 			$video->thumbnails = array();
@@ -823,7 +824,7 @@ class WP_Theater_Shortcodes  {
 			$videos = $out->videos;
 			$out = $response;
 			$out->videos = $videos;
-			$out->url = apply_filters('wp_theater-vimeo_more_url', $out->url, $atts, $out->videos[0]->id);
+			$out->url = apply_filters('wp_theater-vimeo_more_url', $out->url, $atts, $out);
 
 			// just make sure we have a title named 'title'....
 			if ($atts['mode'] == 'user') {
@@ -893,6 +894,8 @@ class WP_Theater_Shortcodes  {
 			return $atts;
 		}
 
+		// assume that the embed_width is not percent based. ? Bad idea but eh.
+
 		// establish a fallback
 		$dimensions = array('width' => 640, 'height' => 360);
 
@@ -906,7 +909,7 @@ class WP_Theater_Shortcodes  {
 		if ($atts['embed_width'] !== FALSE) {
 			$dimensions['width'] = $atts['embed_width'];
 			$ratio = $dimensions['width'] / (int) $atts['embed_width'];
-			$atts['embed_width'] = $ratio * $dimensions['height'];
+			$atts['embed_width'] = round($ratio * $dimensions['height']);
 			return $atts;
 		}
 
@@ -915,7 +918,7 @@ class WP_Theater_Shortcodes  {
 			global $content_width;
 			$ratio = $content_width / (int) $dimensions['width'];
 			$atts['embed_width'] = $content_width;
-			$atts['embed_height'] = $ratio * $dimensions['height'];
+			$atts['embed_height'] = round($ratio * $dimensions['height']);
 			return $atts;
 		}
 
