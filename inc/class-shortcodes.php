@@ -115,8 +115,6 @@ class WP_Theater_Shortcodes  {
 
 		// Add YouTube preset for sidebars
 		$presets->set_preset('youtube_widget', shortcode_atts($presets->get_preset('youtube'), array(
-			'embed_width' => 360,
-			'embed_height' => 170,
 			'max' => 9,
 			'img_size' => 'small',
 			'show_video_title'  => FALSE,
@@ -128,8 +126,6 @@ class WP_Theater_Shortcodes  {
 
 		// Add Vimeo preset for sidebars
 		$presets->set_preset('vimeo_widget', shortcode_atts($presets->get_preset('vimeo'), array(
-			'embed_width' => 360,
-			'embed_height' => 170,
 			'max' => 9,
 			'img_size' => 'small',
 			'show_video_title'  => FALSE,
@@ -504,63 +500,69 @@ class WP_Theater_Shortcodes  {
 		foreach($atts as $key => $value) {
 
 			// if the key is not numeric then skip this
-			if(!is_int($key)) continue;
+			if(is_int($key)) {
 
-			switch($value) {
+				switch($value) {
 
-				// automatically look for registered services and modes
-				case in_array($value, $this->services):
-					$atts['service'] = $value;
-					unset($atts[$key]);
-				 break;
+					// automatically look for registered services and modes
+					case in_array($value, $this->services):
+						$atts['service'] = $value;
+						unset($atts[$key]);
+					 break;
 
-				case in_array($value, $this->modes):
-					$atts['mode'] = $value;
-					unset($atts[$key]);
-				 break;
+					case in_array($value, $this->modes):
+						$atts['mode'] = $value;
+						unset($atts[$key]);
+					 break;
 
-				case 'show_title':
-				case 'show_video_title':
-				case 'show_more_link':
-				case 'show_theater':
-				case 'show_fullwindow':
-				case 'show_lowerlights':
-				case 'cache':
-				case 'keep_ratio':
-				case 'autoplay_onclick':
-					$atts[$value] = TRUE;
-					unset($atts[$key]);
-				 break;
+					case 'show_title':
+					case 'show_video_title':
+					case 'show_more_link':
+					case 'show_theater':
+					case 'show_fullwindow':
+					case 'show_lowerlights':
+					case 'cache':
+					case 'keep_ratio':
+					case 'autoplay_onclick':
+						$atts[$value] = TRUE;
+						unset($atts[$key]);
+					 break;
 
-				case 'hide_title':
-				case 'hide_video_title':
-				case 'hide_more_link':
-				case 'hide_theater':
-				case 'hide_fullwindow':
-				case 'hide_lowerlights':
-					$atts['show' . substr($value, 4)] = FALSE;
-					unset($atts[$key]);
-				 break;
+					case 'hide_title':
+					case 'hide_video_title':
+					case 'hide_more_link':
+					case 'hide_theater':
+					case 'hide_fullwindow':
+					case 'hide_lowerlights':
+						$atts['show' . substr($value, 4)] = FALSE;
+						unset($atts[$key]);
+					 break;
 
-				case 'dont_cache':
-				case 'dont_keep_ratio':
-				case 'dont_autoplay_onclick':
-					$atts[substr($value, 5)] = FALSE;
-					unset($atts[$key]);
-				 break;
+					case 'dont_cache':
+					case 'dont_keep_ratio':
+					case 'dont_autoplay_onclick':
+						$atts[substr($value, 5)] = FALSE;
+						unset($atts[$key]);
+					 break;
 
-				case '1cols':
-				case '2cols':
-				case '3cols':
-				case '4cols':
-				case '5cols':
-				case '6cols':
-					$atts['columns'] = (int) substr($value, 0, 1);
-					unset($atts[$key]);
-				 break;
+					case '1cols':
+					case '2cols':
+					case '3cols':
+					case '4cols':
+					case '5cols':
+					case '6cols':
+						$atts['columns'] = (int) substr($value, 0, 1);
+						unset($atts[$key]);
+					 break;
 
-				default:
-				 break;
+					default:
+					 break;
+				}
+			}else {
+				if ($atts[$key] == 'false' || $atts[$key] == 'FALSE')
+					$atts[$key] = FALSE;
+				elseif ($atts[$key] == 'true' || $atts[$key] == 'TRUE')
+					$atts[$key] = TRUE;
 			}
 		}
 
@@ -583,15 +585,16 @@ class WP_Theater_Shortcodes  {
 		$cache_life = isset($options['cache_life']) ? (int) $options['cache_life'] : 0;
 
 		// get data and maybe set transient
-		if($do_cache = ($atts['mode'] != 'preview' && ($cache_life !== 0 || $atts['cache']))) {
+		if($do_cache = ($atts['cache'] !== false && $atts['mode'] != 'preview' && $cache_life !== 0)) {
 
 			// get a transient name that is both (most likely) unique and under the hill
 			$transient_name = 'wptheater-' . substr($atts['service'], 0, 3) . '' . substr($atts['mode'], 0, 2) . '_' . substr($atts['id'], 0, 24);			
 			$out = get_transient($transient_name);
 
 			// if we have a valid transient then return that instead.
-			if ($out !== FALSE && !is_string($out) && isset($out->plugin_version) && $out->plugin_version = WP_Theater::VERSION)
+			if ($out !== FALSE && !is_string($out) && isset($out->plugin_version) && $out->plugin_version = WP_Theater::VERSION){
 				return $out;
+			}
 		}
 
 		$request_url = $this->get_request_url($atts);
@@ -754,12 +757,16 @@ class WP_Theater_Shortcodes  {
 	 *
 	 * @return string The resulting url
 	 */
-	public function get_youtube_more_url($atts, $data = FALSE) {
+	public function get_youtube_more_url($val, $atts, $data = FALSE) {
+
+		if ($val !== false) 
+			return $val;
 
 		$out = $atts['modes']['link'];
+
 		if($atts['mode'] == 'user')
 			$out .= 'user/' . $atts['id'];
-		else
+		else {
 			$out .= 'watch?';
 			if($atts['mode'] == 'embed' || $atts['mode'] == 'preview')
 				$out .= 'v=' . $atts['id'];
@@ -767,6 +774,7 @@ class WP_Theater_Shortcodes  {
 				$first_vid = $data->videos[0];
 				$out .= 'v=' . $first_vid->id . '&list=' . $atts['id'];
 			}
+		}
 
 		return $out;
 	}

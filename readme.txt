@@ -249,6 +249,11 @@ object
 
 == Changelog ==
 
+= 1.1.5 (6/02/2014) =
+
+* Fixed bug with YouTube *more links*.
+* Fixed bug where *cache* setting was ignored.
+
 = 1.1.4 (5/18/2014) =
 
 * Added support for Vimeo Albums.
