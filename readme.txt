@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo album, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 1.2
+Stable tag: 1.1.5
 License: GPLv3
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
