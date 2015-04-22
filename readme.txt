@@ -3,8 +3,8 @@ Contributors: kentfarst
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU
 Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo album, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
-Tested up to: 3.9.1
-Stable tag: 1.1.5
+Tested up to: 4.2
+Stable tag: 1.2
 License: GPLv3
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
@@ -14,7 +14,7 @@ WP Theater provides shortcodes for integrating **YouTube** and **Vimeo** video e
 
 = Requirements =
 
-1. Tested on WordPress version 3.6 and later.  Does not support Multisite, yet.
+1. Current version tested on WordPress version 3.9 and later.
 1. PHP 5.3 or later with cURL
 
 = Usage =
@@ -47,6 +47,7 @@ http://redshiftstudio.com/wp-theater/
 `
 [youtube user]UserName[/youtube]
 [vimeo user]UserID[/vimeo]
+// for YouTube's v3 API see FAQ about user uploads vs playlists.
 `
 
 **Channel** - Listing of videos from a specific channel
@@ -69,7 +70,7 @@ http://redshiftstudio.com/wp-theater/
 [vimeo group]GroupID[/vimeo]
 `
 
-**NOTICE -- YouTube has depreciated the api (v2) used by this plugin.  They will shut down that API version in April 2015.  There will be an update before then but it will require a simple API key for continued use.**
+**NOTICE -- YouTube has depreciated their v2 API.  It is highly recommended that you enable the v3 API to avoid and depreciation issues in the future.**
 
 
 == Frequently Asked Questions ==
@@ -77,20 +78,25 @@ http://redshiftstudio.com/wp-theater/
 = How can I futher customize this plugin =
 Please check the Other Notes section for futher development information.
 
+= When using YouTube's v3 API, why does my user name not work anymore for user modes? =
+This is to avoid an extra request from YouTube.  Since YouTube automatically does a Uploads playlist, it is much easier to use that instead.  So for v3, user and playlist modes are identical except for the titles.
+
+To find your uploads playlist go to your user's channel and hover over the Uploads section (not menu button).  A play button will appear that links to your uploads playlist.  Odd, I know.  A bit of a PITA, I know.
+
 = Can I use this plugin to show private content from my YouTube or Vimeo account? =
-No, this plugin will only show publically available content.  It will skip any videos that are not publicly embeddable, even password protected videos.  These features and more will be part of the WP THEATER PRO plugin; which is currently in development.  If you need this feature now then you are looking for a plugin that requires an API key from that service.
+No, this plugin will only show publically available content.  It will skip any videos that are not publicly embeddable, even password protected videos.  If you need this feature now then you are looking for a plugin that requires OAuth2 credentials from that service.
 
 = Can I get single previews to display in the theater when clicked? =
-Not right now.  Single previews, e.g. [vimeo preview], are really only meant as a nice way to link to a video.
+Not right now.  Single previews, e.g. [vimeo preview], are really only meant as a nice way to link to a video or for use with a popup.
 
 = Can I build a listing from multiple video IDs, e.g. [youtube theater]id1,id2,id3[/youtube]? =
 Not for now, we suggest using playlists, albums or channels for this task.  Benifits of both are the ability to add another user's video as well as adding and reordering them directly from YouTube or Vimeo.
 
 = The autoscrolling is going behind my fixed header.  How can I fix this =
-This is a stretch of this plugins scope but there is a possible fix.  We followed TwentyFourteens method of the body element having a "masthead-fixed" class and the main header must have either an id of "masthead" or class of *site-header*.
+This is a stretch of this plugins scope but there is a possible fix.  We followed TwentyFourteens method of the body element having a "masthead-fixed" class and the main header must have either an id of "masthead" or class of "site-header".
 
 = What settings can be changed? =
-Outside of the shortcode's parameters there are settings for you to disable the loaded assets as well setting cache expirations.
+Outside of the shortcode's parameters there are settings for you to disable the loaded assets as well setting cache expirations, if used.
 
 * *Use Default CSS* - You can choose to disable the built in CSS file so that you can write your own.
 * *Use Default Genericons* - You can choose to disable the Genericons fallback CSS file.  You should only disable the Genericons if you've also disabled the CSS file as the characters/icons are currently hardcoded.  WP Theater's genericons will not load if genericons are already enqueued.
@@ -182,11 +188,12 @@ array(
 	'show_fullwindow' => FALSE,
 	'show_lowerlights' => FALSE,
 	'keep_ratio' => TRUE,
+	'iframe_placeholder' = > TRUE            // since 1.2.0
 
 	// can only be defined in presets
 	'modes' => array(), // the modes array with matching link formats
 	'classes' => array( // the classes to apply to their respective elements
-		'section' => 'entry-section wp-theater-section %service% %mode% %preset%',
+		'section' => 'entry-section wp-theater-section %service%',
 		'theater' => 'wp-theater-bigscreen',
 		'embed' => 'wp-theater-iframe',
 		'list' => 'wp-theater-listing',
@@ -214,7 +221,9 @@ NOTE:  Each mode URL must have %id% in the place of the id.  And, it's a bit dum
 = What do the formatted feeds look like? =
 Vimeo's feed will return exactly what their API states except we merge their info and video requests into one and clone values to help normalize the feeds.  Youtube on the other hand is almost completely reformatted into a format based on Vimeo's
 
-As of v1.0.0 you can count on the full feeds returning the following content with an exception being that single preview feeds do not have the feed title or url:
+You can count on the full feeds returning the following content with an exception being that single preview feeds do not have the feed title or url.
+
+Also, with YouTube's v3 API enabled, rating, likeCount and viewCount will always be empty strings:
 `
 object
 	'title' => string
@@ -237,8 +246,8 @@ object
 				'small' => string
 				'medium' => string
 				'large' => string
+				'cover' => string       // since 1.2.0 -- set to the largest available image.
 
-// needs author info, I know.
 `
 
 
@@ -248,6 +257,17 @@ object
 
 
 == Changelog ==
+
+= 1.2.0 (4/21/2015) =
+
+* Added settings to enable YouTube's v3 API.
+* Added setting to disable the default [vimeo] and [youtube] shortcodes for better compatability (use [wptheater vimeo] or [wptheater youtube] insead).
+* Added option to use an `iframe_placeholder` image for playlist, user, group, album or channel modes (default: TRUE).  More testing is needed before offering the same for stand alone embeds and theaters.
+* Fixed errors when using a user's uploads as a playlist in YouTube's v2 API.
+* Fixed instances where lower lights and full window wouldn't appear.
+* Updated styling for fully responsive iframes without JavaScript and tweaked the full window overlay.  Custom styling from previous versions may not be targeted correctly in this version.
+* Updated column responsiveness to only break at 480px into two columns.
+* Partial & temp fix for genericon issues where character codes have changed across different versions.  Will be switching to SVG & fallback images in the future due to this issue.
 
 = 1.1.5 (6/02/2014) =
 

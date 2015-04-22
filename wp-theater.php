@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.1.5
+Version: 1.2.0
 */
 
 if( defined( 'ABSPATH' ) && defined( 'WPINC' ) && !class_exists( 'WP_Theater' ) ){
@@ -18,7 +18,7 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.1.5';
+	const VERSION = '1.2.0';
 
 	/**
 	 * Plugin directory
@@ -80,6 +80,7 @@ class WP_Theater {
 		// Verify cURL requirement
 		if ( !function_exists( 'curl_init' ) ) {
 			echo "<strong>WP Theater</strong> requires the PHP <strong>cURL</strong> extension, and has been deactivated!" ;
+			// ehh... needs to deactivate here tard
 			exit;
 		}
 
@@ -89,11 +90,14 @@ class WP_Theater {
 			// Setup default options
 			$option = array( 
 				'version' => static::VERSION, 
-				'load_css' => '1', 
-				'load_js' => '1', 
-				'load_genericons' => '1', 
-				'cache_life' => 14400, 
-				'show_activate_notice' => '1'
+				'load_css' => '1',
+				'load_js' => '1',
+				'load_genericons' => '1',
+				'cache_life' => 14400,
+				'show_activate_notice' => '1',
+				'yt_v3_sapi_enabled' => '0',
+				'yt_v3_sapi_key' => '',
+				'enable_default_shortcodes' => '1'
 			 );
 			add_option( 'wp_theater_options', $option );
 
@@ -101,10 +105,16 @@ class WP_Theater {
 
 			// Upgrade
 			$option = get_option( 'wp_theater_options' );
+
+			if(version_compare( $option['version'], '1.2', '<' )) {
+				$option['yt_v3_sapi_enabled'] = '0';
+				$option['yt_v3_sapi_key'] = '';
+				$option['enable_default_shortcodes'] = '1';
+			}
+
 			$option['show_activate_notice'] = '1';
 			$option['version'] = static::VERSION;
 			update_option( 'wp_theater_options', $option );
-
 		}
 
 	}
@@ -168,7 +178,17 @@ class WP_Theater {
 		if ( !current_user_can('activate_plugins') || (isset($option['show_activate_notice']) && $option['show_activate_notice'] != '1')) return;
 
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notice_activation' ) );
+	}
 
+	/**
+	 * Adds setting link to plugin list
+	 * @since WP Theater 1.2
+	 */
+	public function add_action_links( $links ) {
+		return array_merge(
+			array('settings' => '<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '">' . __( 'Settings', $this->plugin_slug ) . '</a>'),
+			$links
+		);
 	}
 
 	/**
@@ -206,12 +226,12 @@ class WP_Theater {
 		$load_css = ( isset( $options['load_css'] ) ) ? $options['load_css'] : '';
 
 		if( (int) $load_css == 1 )
-			wp_enqueue_style( 'wp_theater-styles', static::$uri . 'css/style-min.css', array(), '20140518' );
+			wp_enqueue_style( 'wp_theater-styles', static::$uri . 'css/style.min.css', array(), '20150404' );
 
 		// Add Genericons font, used in the main stylesheet IF it's not queued up already
 		$load_gi = ( isset( $options['load_genericons'] ) ) ? $options['load_genericons'] : '';
 		if ( (int) $load_gi == 1 && !wp_style_is( 'genericons', 'registered' ) && !wp_style_is( 'genericons', 'enqueued' ) )
-			wp_enqueue_style( 'genericons', static::$uri . '/fonts/genericons.css', array(), '3.02' );
+			wp_enqueue_style( 'genericons', static::$uri . 'fonts/genericons.css', array(), '3.02' );
 	}
 
 	/**
@@ -222,7 +242,7 @@ class WP_Theater {
 		$options = get_option( 'wp_theater_options' );
 		$load_js = ( isset( $options['load_js'] ) ) ? $options['load_js'] : '';
 		if( (int) $load_js == 1 )
-			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script-min.js', array( 'jquery' ), '20140518', TRUE );
+			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script.min.js', array( 'jquery' ), '20150404', TRUE );
 	}
   /**/
 
