@@ -4,7 +4,7 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo album, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 1.1.5
+Stable tag: 1.2.2
 License: GPLv3
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
@@ -258,7 +258,11 @@ object
 
 == Changelog ==
 
-= 1.2.0 (4/21/2015) =
+= 1.2.2 (4/22/2015) =
+
+* Facepalm -- Fixed issue with JS and file names
+
+= 1.2.0 (4/22/2015) =
 
 * Added settings to enable YouTube's v3 API.
 * Added setting to disable the default [vimeo] and [youtube] shortcodes for better compatability (use [wptheater vimeo] or [wptheater youtube] insead).
