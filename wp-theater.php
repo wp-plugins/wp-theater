@@ -7,7 +7,7 @@ Author: Kenton Farst
 Author URI: http://kent.farst.net
 Donate URI: http://redshiftstudio.com/wp-theater/
 License: GPLv3
-Version: 1.2.2
+Version: 1.2.3
 */
 
 if( defined( 'ABSPATH' ) && defined( 'WPINC' ) && !class_exists( 'WP_Theater' ) ){
@@ -18,7 +18,13 @@ class WP_Theater {
 	 * Version constant
 	 * @since WP Theater 1.0.0
 	 */
-	const VERSION = '1.2.2';
+	const VERSION = '1.2.3';
+
+	/**
+	 * Plugin Base Name
+	 * @since WP Theater 1.2.3
+	 */
+	public static $basename;
 
 	/**
 	 * Plugin directory
@@ -57,11 +63,11 @@ class WP_Theater {
 	public static $settings;
 
 	/**
-	 * Constructs .  .  .  .    . 
+	 * Constructs
 	 * @since WP Theater 1.0.0
 	 */
 	function __construct() {
-		// nothing to construct as it's all static methods
+		// nothing to construct
 	}
 
 	/**
@@ -84,39 +90,40 @@ class WP_Theater {
 			exit;
 		}
 
+		$option = get_option( 'wp_theater_options' );
 		// establish default settings
-		if ( !get_option( 'wp_theater_options' ) ) {
+		if ( FALSE === $option ) {
 
 			// Setup default options
 			$option = array( 
-				'version' => static::VERSION, 
 				'load_css' => '1',
 				'load_js' => '1',
-				'load_genericons' => '1',
-				'cache_life' => 14400,
-				'show_activate_notice' => '1',
+				'cache_life' => '14400',
 				'yt_v3_sapi_enabled' => '0',
 				'yt_v3_sapi_key' => '',
 				'enable_default_shortcodes' => '1'
 			 );
-			add_option( 'wp_theater_options', $option );
 
 		} else {
 
 			// Upgrade
-			$option = get_option( 'wp_theater_options' );
 
-			if(version_compare( $option['version'], '1.2', '<' )) {
+			if(version_compare( $option['version'], '1.2.0', '<' )) {
 				$option['yt_v3_sapi_enabled'] = '0';
 				$option['yt_v3_sapi_key'] = '';
 				$option['enable_default_shortcodes'] = '1';
 			}
 
-			$option['show_activate_notice'] = '1';
-			$option['version'] = static::VERSION;
-			update_option( 'wp_theater_options', $option );
+			if(version_compare( $option['version'], '1.2.3', '<' )) {
+				if(isset($option['load_genericons'])){
+					unset($option['load_genericons']);
+				}
+			}
 		}
 
+		$option['show_activate_notice'] = '1';
+		$option['version'] = static::VERSION;
+		update_option( 'wp_theater_options', $option );
 	}
 
 	/**
@@ -132,7 +139,7 @@ class WP_Theater {
 	 * @since WP Theater 1.1.0
 	 */
 	public static function deactivate() {
-		deactivate_plugins( plugin_basename( __FILE__ ) );
+		deactivate_plugins( static::$basename );
 	}
 
 	/**
@@ -155,8 +162,8 @@ class WP_Theater {
 		register_uninstall_hook(    __FILE__, array( __CLASS__, 'uninstall'    ) );
 
 		if ( is_admin() ) {
-			// handle new activation
-			add_action( 'load-plugins.php', array( __CLASS__, 'activate_check' ) );
+			add_action( 'load-plugins.php', array( __CLASS__, 'activate_notices' ) );
+			add_action( 'admin_init', array( __CLASS__, 'admin_notices' ) );
 
 			require_once( static::$inc . 'class-settings.php' );
 			static::$settings   = new WP_Theater_Settings();
@@ -170,42 +177,60 @@ class WP_Theater {
 	}
 
 	/**
-	 * Handles new activations 
-	 * @since WP Theater 1.1.0
+	 * Handles new activation notices
+	 * @since WP Theater 1.2.3
 	 */
-	public static function activate_check() {
-		$option = get_option( 'wp_theater_options' );
-		if ( !current_user_can('activate_plugins') || (isset($option['show_activate_notice']) && $option['show_activate_notice'] != '1')) return;
+	public static function activate_notices() {
+		if ( !current_user_can('activate_plugins') ) return;
 
-		add_action( 'admin_notices', array( __CLASS__, 'admin_notice_activation' ) );
+		$option = get_option( 'wp_theater_options' );
+
+		if ( isset($option['show_activate_notice']) && $option['show_activate_notice'] == '1' ){
+			add_action( 'admin_notices', array( __CLASS__, 'admin_notice_activation' ) );
+		}
 	}
 
 	/**
-	 * Adds setting link to plugin list
-	 * @since WP Theater 1.2
+	 * Handles persistant notices
+	 * @since WP Theater 1.2.3
 	 */
-	public function add_action_links( $links ) {
-		return array_merge(
-			array('settings' => '<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_slug ) . '">' . __( 'Settings', $this->plugin_slug ) . '</a>'),
-			$links
-		);
+	public static function admin_notices() {
+		if ( !current_user_can('manage_options') ) return;
+
+		$option = get_option( 'wp_theater_options' );
+
+		if ( !isset($option['yt_v3_sapi_enabled']) || $option['yt_v3_sapi_enabled'] != '1' ) {
+			add_action( 'admin_notices', array( __CLASS__, 'admin_notice_upgrade_youtube' ) );
+		}
 	}
 
 	/**
 	 * Outputs activation notice
 	 * @since WP Theater 1.1.0
 	 */
-	//add_action( 'admin_notices', array( __CLASS__, 'admin_notices_donate' ) );
 	public static function admin_notice_activation() {
     ?>
-    <div class="updated" style="padding:6px;">
+    <div class="notice is-dismissible" style="padding:6px;">
 			<a style="float:right;padding:6px;" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=X3FWTE2FBBTJU" target="_blank" rel="nofollow payment" title="Donate through PayPal"><img src="https://www.paypal.com/en_US/i/btn/btn_donate_LG.gif" alt="PayPal Donate" /></a>
 			<p>Thank you for using WP Theater.  For more usage information please visit <a href="http://redshiftstudio.com/wp-theater/" rel="author" title="WP Theater on Redshift Studio's website">redshiftstudio.com/wp-theater/</a></p>
     </div>
     <?php
+		// Makes sure the notice is only seen once, on the plugin page only, and only for users who can activate plugins 
 		$option = get_option( 'wp_theater_options' );
 		$option['show_activate_notice'] = '0';
 		update_option( 'wp_theater_options', $option );
+	}
+
+	/**
+	 * Outputs YouTube v3 notice
+	 * @since WP Theater 1.2.3
+	 */
+	public static function admin_notice_upgrade_youtube() {
+    ?>
+    <div class="wp-theater-youtube-upgrade-notice update-nag" style="padding:6px;">
+			<p>WP Theater - YouTube now requires upgrading to the v3 API.  Visit <a href="<?php echo admin_url( 'options-general.php?page=wp_theater' ) ?>" rel="author" title="WP Theater Settings">WP Theater's Settings</a> to enable YouTube's v3 API and for links to help get an API Key.</p>
+    </div>
+    <?php
 	}
 
 	/**
@@ -223,15 +248,10 @@ class WP_Theater {
 	 */
 	public static function enqueue_styles() {
 		$options = get_option( 'wp_theater_options' );
-		$load_css = ( isset( $options['load_css'] ) ) ? $options['load_css'] : '';
 
-		if( (int) $load_css == 1 )
-			wp_enqueue_style( 'wp_theater-styles', static::$uri . 'css/style.min.css', array(), '20150404' );
-
-		// Add Genericons font, used in the main stylesheet IF it's not queued up already
-		$load_gi = ( isset( $options['load_genericons'] ) ) ? $options['load_genericons'] : '';
-		if ( (int) $load_gi == 1 && !wp_style_is( 'genericons', 'registered' ) && !wp_style_is( 'genericons', 'enqueued' ) )
-			wp_enqueue_style( 'genericons', static::$uri . 'fonts/genericons.css', array(), '3.02' );
+		$load_css = ( isset( $options['load_css'] ) ) ? (int) $options['load_css'] : '';
+		if( $load_css )
+			wp_enqueue_style( 'wp_theater-styles', static::$uri . 'css/style.min.css', array(), '20150426' );
 	}
 
 	/**
@@ -240,15 +260,16 @@ class WP_Theater {
 	 */
 	public static function enqueue_scripts() {
 		$options = get_option( 'wp_theater_options' );
-		$load_js = ( isset( $options['load_js'] ) ) ? $options['load_js'] : '';
-		if( (int) $load_js == 1 )
-			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script.min.js', array( 'jquery' ), '20150404', TRUE );
+		$load_js = ( isset( $options['load_js'] ) ) ? (int) $options['load_js'] : '';
+		if( $load_js )
+			wp_enqueue_script( 'wp_theater-scripts', static::$uri . 'js/script.min.js', array( 'jquery' ), '20150426', TRUE );
 	}
   /**/
 
 } /* END CLASS*/
 
 // define the plugin's location variables
+WP_Theater::$basename = plugin_basename(__FILE__);
 WP_Theater::$dir = trailingslashit( plugin_dir_path( __FILE__ ) );
 WP_Theater::$uri = trailingslashit( plugin_dir_url( __FILE__ ) );
 WP_Theater::$inc = WP_Theater::$dir  .  trailingslashit( 'inc' );
