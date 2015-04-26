@@ -4,13 +4,13 @@ Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_i
 Tags: video, shortcode, vimeo shortcode, youtube shortcode, embed, vimeo embed, youtube embed, channel, vimeo channel, playlist, youtube playlist, vimeo group, youtube user, vimeo album, vimeo user, youtube, vimeo, youtube api, vimeo api, video preview, vimeo preview, youtube preview, lower lights, full window, preset, shortcode preset, responsive video, responsive embed, responsive iframe,
 Requires at least: 3.6
 Tested up to: 4.2
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv3
 
 Shortcodes for YouTube and Vimeo. Includes embeds, "Theater" embed, thumbed previews, playlist, channel, user uploads and groups.
 
 == Description ==
-WP Theater provides shortcodes for integrating **YouTube** and **Vimeo** video embeds and feeds into your posts or widgets. Some options include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, user uploads and groups.  WP Theater was built with developers in mind, those who need flexibility. With that said, great effort was put into making sure this plugin stayed simple.
+WP Theater provides shortcodes for integrating **YouTube** and **Vimeo** video embeds and feeds into your posts or widgets. Some options include traditional embedding, single video previews, a wrapped "Theater" embed, and video listings from playlists, channels, albums and groups.  WP Theater was built with developers in mind, those who need flexibility. With that said, great effort was put into making sure this plugin stayed simple.
 
 = Requirements =
 
@@ -69,9 +69,6 @@ http://redshiftstudio.com/wp-theater/
 `
 [vimeo group]GroupID[/vimeo]
 `
-
-**NOTICE -- YouTube has depreciated their v2 API.  It is highly recommended that you enable the v3 API to avoid and depreciation issues in the future.**
-
 
 == Frequently Asked Questions ==
 
@@ -223,7 +220,7 @@ Vimeo's feed will return exactly what their API states except we merge their inf
 
 You can count on the full feeds returning the following content with an exception being that single preview feeds do not have the feed title or url.
 
-Also, with YouTube's v3 API enabled, rating, likeCount and viewCount will always be empty strings:
+Also, with YouTube's v3 API enabled, rating, likeCount and viewCount will always be empty strings since you must use OAuth2 and be a verified content owner:
 `
 object
 	'title' => string
@@ -250,7 +247,6 @@ object
 
 `
 
-
 == Screenshots ==
 
 1. Sample screen shot of how a Vimeo group would look.  Image shows the title, theater, lower-lights & full window buttons, videos listing with thumb & title and a link to more content.
@@ -258,9 +254,13 @@ object
 
 == Changelog ==
 
-= 1.2.2 (4/22/2015) =
+= 1.2.3 (4/26/2015) =
 
-* Facepalm -- Fixed issue with JS and file names
+* Added notification for dealing with the YouTube's v3 ugrade issue.
+* Fixed missing icons due to character code changes in Genericons by switching to a (semi) custom icons font and merged the css into one file.
+* Fixed video listings margins and inheritance.
+* Fixed issue where updating the plugin settings would delete the version number and cause an unexpected output error during activation as well as resetting all plugin settings
+* Updated styling to compensate for the admin bar, when present.
 
 = 1.2.0 (4/22/2015) =
 
@@ -287,7 +287,7 @@ object
 * Fixed PHP and cURL activation check... If not, I'm snapping a(nother) keyboard.
 * Fixed error when YouTube ratings and likes data are blocked for a video.
 * Fixed *cache* shorthand parameter and updated default to not cache.
-* Fixed previews from remaining selected or being selected initially when no theater(embed) is preset or when using theater_id.
+* Fixed previews from remaining selected or being selected initially when no theater(embed) is present or when using theater_id.
 * Updated solo previews so they display inside a figure element with a figcaption wrapped title.
 * Updated *theater_id* to cause listings to hide their theater.
 * Updated more_link to not carry a nofollow rel value.
