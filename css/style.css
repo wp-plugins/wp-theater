@@ -1,20 +1,36 @@
-/* Expanded version of the style.min.css file. */
+/* Expanded version of the style.min.css file for reference */
 
 /*
- * Genericons
+ * Icons
  */
 
+@font-face {
+  font-family:"WPTheaterIcons";
+  src:url("../fonts/wp-theater-icons-font.eot");
+  src:url("../fonts/wp-theater-icons-font.eot?#iefix") format("embedded-opentype"),
+    url("../fonts/wp-theater-icons-font.woff") format("woff"),
+    url("../fonts/wp-theater-icons-font.ttf") format("truetype"),
+    url("../fonts/wp-theater-icons-font.svg#wp-theater-icons-font") format("svg");
+  font-weight:normal;
+  font-style:normal;
+
+}
+
 .wp-theater-placeholder a:after,
-.wp-theater-more-link,
+.wp-theater-more-link:after,
 .wp-theater-bigscreen .lowerlights-toggle:before,
 .wp-theater-bigscreen .fullwindow-toggle:before{
 	display:inline-block;
-	font:16px/1 Genericons;
-	vertical-align:text-bottom;
+	-webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+	font:16px/1 'WPTheaterIcons';
+	vertical-align:baseline;
+  font-style:normal !important;
+  font-weight:normal !important;
+  font-variant:normal !important;
+  text-transform:none !important;
 	position:relative;
-	vertical-align:middle;
-	line-height:1;
-	top:-1px}
+  speak:none}
 
 
 /*
@@ -51,7 +67,7 @@
 	width:100%;
 	height:100%}
 .wp-theater-placeholder a:after{
-	content:"\f452";
+	content:"a";
 	color:#fff;
 	position:absolute;
 	top:50%;
@@ -92,13 +108,15 @@
 	display:none}
 
 .wp-theater-bigscreen .lowerlights-toggle:before{
-	content:'\f403';
+	content:'b';
+	top:2px;
 	font-size:1em}
 
 .wp-theater-bigscreen .fullwindow-toggle{
 	margin-left:0.25em}
 .wp-theater-bigscreen .fullwindow-toggle:before{
-	content:'\f422';
+	content:'d';
+	top:2px;
 	font-size:1em}
 
 /* On */
@@ -118,9 +136,8 @@
 	background:#101010;
 	background:rgba(0,0,0,0.92)}
 
-
 .wp-theater-bigscreen.lowerlights .lowerlights-toggle:before{
-	content:'\f404'}
+	content:'b'} /* maybe update to diff icon later */
 .wp-theater-bigscreen.lowerlights .wp-theater-iframe{
 	z-index:101}
 .wp-theater-bigscreen.lowerlights .lowerlights-toggle{
@@ -134,17 +151,16 @@
 .wp-theater-bigscreen.lowerlights .fullwindow-toggle{
 	position:relative}
 
-
-.wp-theater-bigscreen.fullwindow .fullwindow-toggle:before{
-	content:'\f405';
-	font-size:1.75em;
-	top:0;
+.wp-theater-bigscreen.fullwindow .fullwindow-toggle:before {
+	content:"e";
+	font-size:1.25em;
 	left:-0.0625em;
-	line-height:1}
+	line-height:1;
+	top:0.125em}
 .wp-theater-bigscreen.fullwindow .fullwindow-toggle {
 	color:#aaa;
 	position:fixed;
-	right:0.75em;
+	right:1.25em;
 	top:0.25em}
 .admin-bar .wp-theater-bigscreen.fullwindow .fullwindow-toggle {
 	top:calc(0.25em + 32px)}
@@ -168,7 +184,7 @@
  * Video Listing & Previews
  */
 
-.wp-theater-listing{
+ul.wp-theater-listing{
 	overflow:auto;
 	padding:0;
 	margin:0}
@@ -230,8 +246,7 @@
   margin-bottom:0.6em;
   line-height:1.325;
   overflow:hidden;
-  text-overflow:ellipsis;
-}
+  text-overflow:ellipsis}
 .wp-theater-listing .video-preview.selected .img-link,
 .wp-theater-listing .video-preview.selected .title-link{
 	opacity:.4}
@@ -241,11 +256,12 @@ a.wp-theater-more-link:active,
 a.wp-theater-more-link:after,
 a.wp-theater-more-link:hover:after{
 	text-decoration:none;
-	border:none;}
+	border:none}
 .wp-theater-more-link:after{
-	display: inline-block;
-	content:"\f501";
+	display:inline-block;
+	content:"f";
 	font-size:0.825em;
+	top:0px;
 	padding-left:0.375em;
 	vertical-align:-0.1875em}
 
