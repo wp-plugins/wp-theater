@@ -110,7 +110,7 @@ class WP_Theater_Shortcodes  {
 					'playlist'   => 'https://www.googleapis.com/youtube/v3/playlistItems?playlistId=%id%&part=snippet,contentDetails,status&maxResults=%max%&key=%key%&userIp=' . $userIP
 				)
 			)));
-		}else {
+		} else {
 			$presets->set_preset('youtube', shortcode_atts($presets->get_preset('default'), array(
 				'service'  => 'youtube',
 				'img_size' => 'medium',
@@ -301,10 +301,10 @@ class WP_Theater_Shortcodes  {
 
 			if (isset($feed->url) && !empty($feed->url)) {
 				if (!$more_text)
-					$more_text = __('More', 'wptheater') . ' ' . $title;
+					$more_text = apply_filters('wp_theater-more_text', __('More', 'wptheater') . ' ' . $title);
 
 				$out .= '	<footer>';
-				$out .= '		<a href="' . esc_url($feed->url) . '" title="' . esc_attr($more_text) . '" rel="external" target="_blank" class="wp-theater-more-link"><span>' . apply_filters('wp_theater-more_text', $more_text) . '</span></a>';
+				$out .= '		<a href="' . esc_url($feed->url) . '" title="' . esc_attr($more_text) . '" rel="external" target="_blank" class="wp-theater-more-link"><span>' . $more_text . '</span></a>';
 				$out .= '	</footer>';
 			}
 		}
@@ -524,6 +524,7 @@ class WP_Theater_Shortcodes  {
 
 		// hide theater if there's a theater id and we're not just a theater
 		// TODO: also hide theater if not using JS file and not specifically set to true...?
+		// Would allow people to use a custom popup without messing with it..?
 		if ($atts['mode'] != 'theater' && $atts['theater_id'])
 			$atts['show_theater'] = FALSE;
 
@@ -664,6 +665,7 @@ class WP_Theater_Shortcodes  {
 		$out->videos = array();
 
 		$out = apply_filters("wp_theater-parse_{$atts['service']}_response", $out, $response, $atts);
+
 		if ($do_cache){
 			$out->plugin_version = WP_Theater::VERSION;
 			set_transient($transient_name, $out, $cache_life);
@@ -779,7 +781,7 @@ class WP_Theater_Shortcodes  {
 	}
 
 	/**
-	 * Takes a response from YouTube's v3 Simple API and returns a formatted object
+	 * Takes a response from YouTube's v3 Public API and returns a formatted object
 	 * @since WP Theater 1.2.0
 	 *
 	 * @param object $out The resulting object
